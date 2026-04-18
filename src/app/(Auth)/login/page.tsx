@@ -1,21 +1,23 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, EyeOff, ArrowRight, BookOpen, Users, BarChart3, Award } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { LoginSchema, LoginType } from '@/Schema/AuthScheema'
-import { Bounce, toast } from 'react-toastify'
+import { useUserData } from '@/Context/UserData'
 import { setToken } from '@/Cookies/auth.actions'
+import { LoginSchema, LoginType } from '@/Schema/AuthScheema'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowRight, Award, BarChart3, BookOpen, Eye, EyeOff, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Bounce, toast } from 'react-toastify'
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const {setToken:setTokenContext}=useUserData()
   const router = useRouter();
 
 
@@ -50,6 +52,7 @@ export default function LoginPage() {
           theme: "light",
           transition: Bounce,
 }); 
+        setTokenContext('result.token');
         await setToken(result.token);
         reset();
 
