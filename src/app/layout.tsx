@@ -1,18 +1,8 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono ,Exo } from "next/font/google";
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import "./globals.css";
+import type { Metadata } from "next";
+import { Exo } from "next/font/google";
 import Providers from './_Components/Providers/Providers';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import "./globals.css";
 
 const exo = Exo({
   variable: "--font-exo",
@@ -33,7 +23,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${exo.variable} ${geistSans.variable} ${geistMono.variable}  h-full antialiased`}
+      className={`${exo.className}   h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>

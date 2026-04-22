@@ -12,7 +12,8 @@ import { ArrowRight, Award, BarChart3, BookOpen, Eye, EyeOff, Users } from 'luci
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Bounce, toast } from 'react-toastify'
+import { Bounce } from "react-toastify/unstyled";
+import { toast } from 'react-toastify'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +25,7 @@ export default function LoginPage() {
   const {register,handleSubmit,reset,setError,formState}=useForm<LoginType>({
     resolver: zodResolver(LoginSchema),
     defaultValues:{
-      email:'',
+      username:'',
       password:''
     },
     mode:'onSubmit'
@@ -33,14 +34,17 @@ export default function LoginPage() {
 
   async function onSubmit(data:LoginType){
   setIsLoading(true);
+  const formData = new URLSearchParams();
+  formData.append('username', data.username);
+  formData.append('password', data.password);
     try{
-      const res = await fetch('',{
+      const res = await fetch('http://localhost:8000/api/auth/login',{
         method:'post',
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formData,
       });
-      const result =await res.json();
-            if (res.ok && result.message === "success") {
+          const result =await res.json();
+        if (result.access_token) {
         toast.success('Account logged in successfully!', {
           position: "top-right",
           autoClose: 2000,
@@ -52,16 +56,14 @@ export default function LoginPage() {
           theme: "light",
           transition: Bounce,
 }); 
-        setTokenContext('result.token');
-        await setToken(result.token);
+        setTokenContext(result.access_token);
+        await setToken(result.access_token);
         reset();
-
         setTimeout(() => {
           router.push("/");
         }, 2000);
-
     }else{
-      throw new Error(result.message || "Login failed");
+      throw new Error(result.detail || "Login failed");
     }
 }catch(err:any){
       setError('password',{message:err.message || "Invalid email or password"});
@@ -153,19 +155,19 @@ export default function LoginPage() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   {/* Email Input */}
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-foreground font-medium">
-                      Institutional Email
+                    <Label htmlFor="username" className="text-foreground font-medium">
+                      Institutional Username
                     </Label>
                     <Input
-                      id="email"
-                      type="email"
-                      {...register('email')}
+                      id="username"
+                      type="text"
+                      {...register('username')}
                       placeholder="faculty@university.edu"
                       className={`bg-white  text-foreground placeholder:text-muted-foreground   h-11 rounded-lg transition-all ${
-                        formState.errors.email ? "border-red-500 bg-red-50/30" : "border-gray-200"
+                        formState.errors.username ? "border-red-500 bg-red-50/30" : "border-gray-200"
                       }`}
                     />
-                    {formState.errors.email && <p className="text-red-600">{formState.errors.email.message}</p>}
+                    {formState.errors.username && <p className="text-red-600">{formState.errors.username.message}</p>}
                   </div>
 
                   {/* Password Input */}
