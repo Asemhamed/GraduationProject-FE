@@ -1,19 +1,17 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useUserData } from '@/Context/UserData'
 import { setToken } from '@/Cookies/auth.actions'
 import { LoginSchema, LoginType } from '@/Schema/AuthScheema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, Award, BarChart3, BookOpen, Eye, EyeOff, Users } from 'lucide-react'
+import { ArrowRight, GraduationCap, IdCard, Lock, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Bounce } from "react-toastify/unstyled";
 import { toast } from 'react-toastify'
+import { Bounce } from "react-toastify/unstyled"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -74,170 +72,128 @@ export default function LoginPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Left Side - Gradient Background */}
+      <div className="relative lg:bg-gradient-to-br bg-[#F5F5F7] lg:from-[#5B6EE1] lg:via-[#5B6EE1] lg:to-[#7B5EA7] lg:w-1/2 flex flex-col">
+        {/* Logo - Desktop */}
+        <div className="hidden lg:flex items-center gap-3 p-8">
+          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <GraduationCap className="w-6 h-6 text-white" />
+          </div>
+          <span className="text-white text-xl font-semibold">Capital University</span>
+        </div>
 
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-secondary/40 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/30 rounded-full blur-3xl"></div>
+        {/* Mobile Header */}
+        <div className="lg:hidden text-white flex flex-col items-center pt-12 pb-8  px-6">
+          <div className="w-24 h-24 bg-[#4A5BC7] rounded-full flex items-center justify-center mb-6">
+            <GraduationCap className="w-12 h-12 " />
+          </div>
+          <h1 className=" text-3xl font-bold text-center text-[#4A5BC7]">Capital University</h1>
+          <p className=" text-lg italic mt-2 text-[#4A5BC7]">Your Future Starts Here</p>
+        </div>
 
-        <div className="absolute top-1/4 left-10 w-px h-32 bg-gradient-to-b from-primary/20 to-transparent"></div>
-        <div className="absolute bottom-1/3 right-20 w-px h-24 bg-gradient-to-b from-transparent to-primary/20"></div>
-      </div>
-
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl w-full items-center">
-
-          <div className="hidden lg:flex flex-col justify-center items-center lg:items-start space-y-8">
-            <div className="space-y-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-cyan-600/40 rounded-2xl backdrop-blur-xl ">
-                <BookOpen className="w-8 h-8 text-primary" />
-              </div>
-              <h1 className="text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-                Faculty Portal
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
-                Manage courses, students, and academic resources with a centralized platform designed for modern education.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 pt-8 w-full max-w-md">
-              <div className="p-4 rounded-xl bg-card/50  backdrop-blur-sm ">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-cyan-600/20 ">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="text-2xl font-bold text-primary">50+</div>
-                </div>
-                <p className="text-sm text-muted-foreground">Active Courses</p>
-              </div>
-              <div className="p-4 rounded-xl bg-card/50  backdrop-blur-sm ">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-cyan-600/20 ">
-                    <Users className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="text-2xl font-bold text-primary">5K+</div>
-                </div>
-                <p className="text-sm text-muted-foreground">Students Enrolled</p>
-              </div>
-              <div className="p-4 rounded-xl bg-card/50  backdrop-blur-sm ">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-cyan-600/20 ">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="text-2xl font-bold text-primary">95%</div>
-                </div>
-                <p className="text-sm text-muted-foreground">Completion Rate</p>
-              </div>
-              <div className="p-4 rounded-xl bg-card/50  backdrop-blur-sm ">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-cyan-600/20 ">
-                    <Award className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="text-2xl font-bold text-primary">4+</div>
-                </div>
-                <p className="text-sm text-muted-foreground">Departments</p>
-              </div>
+        {/* Desktop Bottom Content */}
+        <div className="hidden lg:flex flex-col justify-end flex-1 p-8 pb-16">
+          <h2 className="text-white text-5xl font-bold leading-tight">
+            Your Future
+            <br />
+            Starts Here
+          </h2>
+          <p className="text-white/80 mt-4 max-w-md">
+            Access your academic dashboard, connect with faculty, and manage your university journey securely.
+          </p>
+          
+          {/* Decorative Grid Pattern */}
+          <div className="mt-8 flex gap-4">
+            <div className="grid grid-cols-5 ">
+              <div className="w-10 h-10 bg-white/20 " />
+              <div className="w-10 h-10  " />
+              <div className="w-10 h-10 bg-white/20 " />
+              <div className="w-10 h-10  " />
+              <div className="w-10 h-10  bg-white/20" />
+              <div className="w-10 h-10  " />
+              <div className="w-10 h-10  bg-white/10" />
+              <div className="w-10 h-10  " />
+              <div className="w-10 h-10 bg-white/10" />
+              <div className="w-10 h-10  " />
+              <div className="w-10 h-10  bg-white/20" />
+              <div className="w-10 h-10  " />
+              <div className="w-10 h-10  bg-white/20" />
+              <div className="w-10 h-10  " />
+              <div className="w-10 h-10  bg-white/20" />
             </div>
           </div>
+        </div>
+      </div>
 
-          <div className="flex justify-center lg:justify-end">
-            <Card className="w-full max-w-md border-border/60 bg-card shadow-lg">
-              <CardHeader className="space-y-2 pb-6">
-                <CardTitle className="text-3xl font-bold text-foreground">
-                  Faculty Login
-                </CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  Enter your institutional credentials to access the faculty portal
-                </CardDescription>
-              </CardHeader>
+      <div className="flex-1 bg-[#F5F5F7] lg:bg-white  flex items-start lg:items-center justify-center px-6 py-8 lg:py-0">
+        <div className="w-full max-w-md">
+          {/* Login Card */}
+          <div className="bg-white rounded-3xl lg:rounded-2xl shadow-sm lg:shadow-none p-8 lg:p-0">
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+            <p className="text-gray-500 mb-8">
+              <span className="lg:hidden">Please enter your credentials to access the portal.</span>
+              <span className="hidden lg:inline">Sign in to access your student portal.</span>
+            </p>
 
-              <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Email Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="username" className="text-foreground font-medium">
-                      Institutional Username
-                    </Label>
-                    <Input
-                      id="username"
-                      type="text"
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
+                  Student ID
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <IdCard className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
                       {...register('username')}
-                      placeholder="faculty@university.edu"
-                      className={`bg-white  text-foreground placeholder:text-muted-foreground   h-11 rounded-lg transition-all ${
-                        formState.errors.username ? "border-red-500 bg-red-50/30" : "border-gray-200"
-                      }`}
-                    />
-                    {formState.errors.username && <p className="text-red-600">{formState.errors.username.message}</p>}
-                  </div>
-
-                  {/* Password Input */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password" className="text-foreground font-medium">
-                        Password
-                      </Label>
-                      <a
-                        href="#"
-                        className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-                      >
-                        Forgot password?
-                      </a>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        {...register('password')}
-                        placeholder="••••••••••••"
-                        className={`bg-white  text-foreground placeholder:text-muted-foreground h-11 rounded-lg pr-10 transition-all ${
-                        formState.errors.password ? "border-red-500 bg-red-50/30" : "border-gray-200"
-                      }`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-5 h-5" />
-                        ) : (
-                          <Eye className="w-5 h-5" />
-                        )}
-                      </button>
-
-                      {formState.errors.password && <p className="text-red-600">{formState.errors.password.message}</p>}
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full cursor-pointer h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 mt-8"
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
-                        Logging in...
-                      </>
-                    ) : (
-                      <>
-                        Login
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-
-                <div className="mt-6 text-center">
-                  <p className="text-muted-foreground">
-                    Don&apos;t have an account?{' '}
-                    <a href="#" className="text-primary hover:text-primary/80 font-semibold transition-colors">
-                      Sign up here
-                    </a>
-                  </p>
+                    placeholder="e.g. 12345678"
+                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B6EE1] focus:border-transparent transition-all"
+                  />
                 </div>
-              </CardContent>
-            </Card>
+                {formState.errors.username && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {formState.errors.username.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 uppercase tracking-wide">
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="password"
+                    {...register('password')}
+                    placeholder="••••••••"
+                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B6EE1] focus:border-transparent transition-all"
+                  />
+                </div>
+                {formState.errors.password && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {formState.errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full cursor-pointer group bg-[#4A5BC7] hover:bg-[#5B6EE1] text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors"
+              >
+                <span className="uppercase tracking-wide">Log In</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </button>
+            </form>
+
+            <p className="hidden lg:block text-center text-gray-400 text-sm mt-8">
+              Protected by Capital University IT Services
+            </p>
           </div>
         </div>
       </div>

@@ -1,8 +1,9 @@
-import Admin from "./(Dashboards)/admin/page";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-
-  return<>
-  {true&&<Admin/>}
-  </>
+  if (true){
+    redirect("/admin");
+  }else{
+    redirect("/student")
+  }
   }
