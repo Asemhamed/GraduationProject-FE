@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Sparkles } from "lucide-react"
 import { Badge, FeaturesLayout } from "../_Components/features-layout"
-import { GetFeaturs } from "@/app/api/facilities/features/route"
+import { useUserData } from "@/Context/UserData"
 
 interface Feature {
   id: number
@@ -22,16 +22,35 @@ const formFields = [
 ]
 
 export default function FeaturesPage() {
+  const { token } = useUserData()
   const [features, setFeatures] = useState<Feature[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!token) {
+      setError("No authentication token available")
+      setLoading(false)
+      return
+    }
+
     const fetchFeatures = async () => {
       try {
         setLoading(true)
 
-        const data = await GetFeaturs();
+        const response = await fetch("/api/facilities/features", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch features")
+        }
+
+        const data = await response.json()
         // Handle array response or paginated response
         const featuresList = data;
 
@@ -54,7 +73,7 @@ export default function FeaturesPage() {
     }
 
     fetchFeatures()
-  }, [])
+  }, [token])
 
   const handleAdd = (item: Partial<Feature>) => {
     const newFeature: Feature = {
