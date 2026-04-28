@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Sparkles } from "lucide-react"
 import { Badge, DataPageLayout } from "../_Components/data-page-layout"
+import { GetFeaturs } from "@/app/api/facilities/features/route"
 
 interface Feature {
   id: number
@@ -29,23 +30,11 @@ export default function FeaturesPage() {
     const fetchFeatures = async () => {
       try {
         setLoading(true)
-        
-        const response = await fetch("/api/facilities/features", {
-          method: "GET",
-          headers: {
-            "Accept": "application/json",
-          },
-        })
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch features")
-        }
-
-        const data = await response.json()
-        
+        const data = await GetFeaturs();
         // Handle array response or paginated response
-        const featuresList = Array.isArray(data) ? data : data.data || data.items || []
-        
+        const featuresList = data;
+
         // Transform data to match Feature interface
         const transformedFeatures: Feature[] = featuresList.map((item: any, index: number) => ({
           id: item.feature_id || item.id || index + 1,

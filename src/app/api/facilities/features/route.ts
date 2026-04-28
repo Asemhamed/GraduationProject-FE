@@ -1,6 +1,10 @@
-export async function GET(request: Request) {
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3Nzc5OTQ4ODJ9.yj3VIYF0kt3idHSezL3yN_xwZRG5t4KQyN7Ltqum00w"
-  
+'use server'
+
+import { useUserData } from "@/Context/UserData"
+
+export async function GetFeaturs() {
+  const { token } = useUserData()
+
   try {
     const response = await fetch("http://localhost:8000/api/facilities/features?skip=0&limit=100", {
       method: "GET",
@@ -15,12 +19,12 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json()
-    
-    return Response.json(data)
+
+    return data
   } catch (error) {
     console.error("[v0] Error fetching features from backend:", error)
     return Response.json(
-      { error: "Failed to fetch features" },
+      { error: "Failed to fetch features ss" },
       { status: 500 }
     )
   }
