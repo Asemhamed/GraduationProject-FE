@@ -1,139 +1,79 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Sparkles } from "lucide-react"
 import { Badge, DataPageLayout } from "../_Components/data-page-layout"
 
 interface Feature {
   id: number
-  name: string
-  description: string
-  status: string
-  category: string
-  createdAt: string
+  feature_id?: number
+  feature_name: string
+  name?: string
 }
 
-const initialFeatures: Feature[] = [
-  {
-    id: 1,
-    name: "Live Streaming",
-    description: "Real-time video streaming for online classes",
-    status: "Active",
-    category: "Video",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: 2,
-    name: "Discussion Forums",
-    description: "Student and instructor discussion boards",
-    status: "Active",
-    category: "Communication",
-    createdAt: "2024-01-10",
-  },
-  {
-    id: 3,
-    name: "Quiz Builder",
-    description: "Create and manage course quizzes",
-    status: "Active",
-    category: "Assessment",
-    createdAt: "2024-01-05",
-  },
-  {
-    id: 4,
-    name: "Certificate Generator",
-    description: "Auto-generate course completion certificates",
-    status: "Beta",
-    category: "Documents",
-    createdAt: "2024-02-01",
-  },
-  {
-    id: 5,
-    name: "AI Assistant",
-    description: "AI-powered learning assistant for students",
-    status: "Development",
-    category: "AI",
-    createdAt: "2024-02-10",
-  },
-  {
-    id: 6,
-    name: "Progress Tracking",
-    description: "Track student progress across courses",
-    status: "Active",
-    category: "Analytics",
-    createdAt: "2024-01-20",
-  },
-]
-
 const columns = [
-  { key: "name", label: "Name" },
-  { key: "description", label: "Description" },
-  { key: "category", label: "Category" },
-  {
-    key: "status",
-    label: "Status",
-    render: (item: Feature) => (
-      <Badge
-        variant={
-          item.status === "Active"
-            ? "default"
-            : item.status === "Beta"
-            ? "secondary"
-            : "outline"
-        }
-        className={
-          item.status === "Active"
-            ? "bg-accent text-white"
-            : item.status === "Beta"
-            ? "bg-primary/10 text-primary"
-            : ""
-        }
-      >
-        {item.status}
-      </Badge>
-    ),
-  },
-  { key: "createdAt", label: "Created" },
+  { key: "feature_id", label: "ID" },
+  { key: "feature_name", label: "Feature Name" },
 ]
 
 const formFields = [
-  { key: "name", label: "Feature Name", type: "text" as const, placeholder: "Enter feature name" },
-  { key: "description", label: "Description", type: "textarea" as const, placeholder: "Enter feature description" },
-  {
-    key: "category",
-    label: "Category",
-    type: "select" as const,
-    options: [
-      { label: "Video", value: "Video" },
-      { label: "Communication", value: "Communication" },
-      { label: "Assessment", value: "Assessment" },
-      { label: "Documents", value: "Documents" },
-      { label: "AI", value: "AI" },
-      { label: "Analytics", value: "Analytics" },
-    ],
-  },
-  {
-    key: "status",
-    label: "Status",
-    type: "select" as const,
-    options: [
-      { label: "Active", value: "Active" },
-      { label: "Beta", value: "Beta" },
-      { label: "Development", value: "Development" },
-    ],
-  },
+  { key: "feature_name", label: "Feature Name", type: "text" as const, placeholder: "Enter feature name" },
 ]
 
 export default function FeaturesPage() {
-  const [features, setFeatures] = useState<Feature[]>(initialFeatures)
+  const [features, setFeatures] = useState<Feature[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      try {
+        setLoading(true)
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3Nzc5OTQ4ODJ9.yj3VIYF0kt3idHSezL3yN_xwZRG5t4KQyN7Ltqum00w"
+        
+        const response = await fetch("http://localhost:8000/api/facilities/features?skip=0&limit=100", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch features")
+        }
+
+        const data = await response.json()
+        
+        // Handle array response or paginated response
+        const featuresList = Array.isArray(data) ? data : data.data || data.items || []
+        
+        // Transform data to match Feature interface
+        const transformedFeatures: Feature[] = featuresList.map((item: any, index: number) => ({
+          id: item.feature_id || item.id || index + 1,
+          feature_id: item.feature_id || item.id || index + 1,
+          feature_name: item.feature_name || item.name || "",
+        }))
+
+        setFeatures(transformedFeatures)
+        setError(null)
+      } catch (err) {
+        console.error("[v0] Error fetching features:", err)
+        setError(err instanceof Error ? err.message : "Failed to load features")
+        setFeatures([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFeatures()
+  }, [])
 
   const handleAdd = (item: Partial<Feature>) => {
     const newFeature: Feature = {
-      id: Date.now(),
-      name: item.name || "",
-      description: item.description || "",
-      status: item.status || "Development",
-      category: item.category || "",
-      createdAt: new Date().toISOString().split("T")[0],
+      id: features.length > 0 ? Math.max(...features.map(f => f.id || 0)) + 1 : 1,
+      feature_id: features.length > 0 ? Math.max(...features.map(f => f.feature_id || 0)) + 1 : 1,
+      feature_name: item.feature_name || "",
     }
     setFeatures([...features, newFeature])
   }
@@ -144,6 +84,22 @@ export default function FeaturesPage() {
 
   const handleDelete = (id: number) => {
     setFeatures(features.filter((f) => f.id !== id))
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Loading features...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-red-500">Error: {error}</p>
+      </div>
+    )
   }
 
   return (
