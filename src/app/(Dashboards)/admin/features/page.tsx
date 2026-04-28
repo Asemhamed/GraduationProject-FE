@@ -29,13 +29,11 @@ export default function FeaturesPage() {
     const fetchFeatures = async () => {
       try {
         setLoading(true)
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3Nzc5OTQ4ODJ9.yj3VIYF0kt3idHSezL3yN_xwZRG5t4KQyN7Ltqum00w"
         
-        const response = await fetch("http://localhost:8000/api/facilities/features?skip=0&limit=100", {
+        const response = await fetch("/api/facilities/features", {
           method: "GET",
           headers: {
             "Accept": "application/json",
-            "Authorization": `Bearer ${token}`,
           },
         })
 
