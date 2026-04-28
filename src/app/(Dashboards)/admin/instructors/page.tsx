@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Users } from "lucide-react"
-import { Badge, DataPageLayout } from "../_Components/data-page-layout"
+import { Badge, InstructorsLayout } from "../_Components/instructors-layout"
 
 interface Instructor {
   id: number
@@ -179,7 +179,7 @@ export default function InstructorsPage() {
   }
 
   return (
-    <DataPageLayout
+    <InstructorsLayout
       title="Instructors"
       description="Manage teaching staff and faculty"
       icon={<Users className="h-6 w-6 text-white" />}

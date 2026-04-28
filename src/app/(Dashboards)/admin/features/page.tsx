@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Sparkles } from "lucide-react"
-import { Badge, DataPageLayout } from "../_Components/data-page-layout"
+import { Badge, FeaturesLayout } from "../_Components/features-layout"
 import { GetFeaturs } from "@/app/api/facilities/features/route"
 
 interface Feature {
@@ -90,7 +90,7 @@ export default function FeaturesPage() {
   }
 
   return (
-    <DataPageLayout
+    <FeaturesLayout
       title="Features"
       description="Manage platform features and capabilities"
       icon={<Sparkles className="h-6 w-6 text-white" />}

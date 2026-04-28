@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { BookOpen } from "lucide-react"
-import { Badge, DataPageLayout } from "../_Components/data-page-layout"
+import { Badge, CoursesLayout } from "../_Components/courses-layout"
 
 interface Course {
   id: number
@@ -202,7 +202,7 @@ export default function CoursesPage() {
   }
 
   return (
-    <DataPageLayout
+    <CoursesLayout
       title="Courses"
       description="Manage course catalog and curriculum"
       icon={<BookOpen className="h-6 w-6 text-white" />}

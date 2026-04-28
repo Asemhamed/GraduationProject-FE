@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { DoorOpen } from "lucide-react"
-import { Badge, DataPageLayout } from "../_Components/data-page-layout"
+import { Badge, RoomsLayout } from "../_Components/rooms-layout"
 
 interface Room {
   id: number
@@ -168,7 +168,7 @@ export default function RoomsPage() {
   }
 
   return (
-    <DataPageLayout
+    <RoomsLayout
       title="Rooms"
       description="Manage classrooms and learning spaces"
       icon={<DoorOpen className="h-6 w-6 text-white" />}
