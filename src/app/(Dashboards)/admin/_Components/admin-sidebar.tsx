@@ -99,7 +99,7 @@ export function AdminSidebar() {
                     onClick={() => setMobileOpen(false)}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                       isActive
-                        ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md"
+                        ? "bg-gradient-to-r from-indigo-600 to-violet-500 text-primary-foreground shadow-md"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     } ${collapsed ? "justify-center px-2" : ""}`}
                     title={collapsed ? item.label : undefined}

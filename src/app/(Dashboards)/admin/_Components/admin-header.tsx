@@ -23,15 +23,6 @@ export function AdminHeader() {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search anything..."
-            className="h-10 w-64 rounded-xl border border-border bg-muted/50 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
 
         {/* Notifications */}
         <button className="relative flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
@@ -42,7 +33,7 @@ export function AdminHeader() {
         </button>
 
         {/* Profile */}
-        <div className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 font-semibold text-white shadow-sm md:flex">
+        <div className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm md:flex">
           A
         </div>
       </div>

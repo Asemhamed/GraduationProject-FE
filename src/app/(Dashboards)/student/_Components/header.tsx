@@ -1,20 +1,43 @@
+
 "use client"
 
-import { Settings, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Bell } from "lucide-react"
+import { usePathname } from "next/navigation"
+
+const pageTitles: Record<string, string> = {
+  "/student": "Dashboard",
+  "/student/timetable": "Timetable",
+  "/student/enrollment": "Enrollment",
+  "/student/profile": "Profile",
+}
+
 
 export function Header() {
+  const pathname = usePathname()
+  const title = pageTitles[pathname] || "Dashboard"
+
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-6">
-      <h1 className="text-xl font-bold text-foreground">Capital University</h1>
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon">
-          <Settings className="h-5 w-5 text-muted-foreground" />
-        </Button>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
-          <User className="h-5 w-5 text-primary-foreground" />
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur-sm md:px-6">
+      <div className="flex items-center gap-4 pl-14 md:pl-0">
+        <h1 className="text-xl font-bold text-foreground">{title}</h1>
+      </div>
+
+      <div className="flex items-center gap-3">
+
+        {/* Notifications */}
+        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+          <Bell className="h-5 w-5" />
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white shadow-sm">
+            3
+          </span>
+        </button>
+
+        {/* Profile */}
+        <div className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 font-semibold text-white shadow-sm md:flex">
+          A
         </div>
       </div>
     </header>
   )
 }
+

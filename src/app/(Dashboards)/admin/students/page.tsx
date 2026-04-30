@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { GraduationCap } from "lucide-react"
 import { Badge, DataPageLayout } from "../_Components/data-page-layout"
+import  StudentsLayout  from "../_Components/students-layout"
 
 interface Student {
   id: number
@@ -196,16 +197,16 @@ export default function StudentsPage() {
   }
 
   return (
-    <DataPageLayout
-      title="Students"
-      description="Manage student enrollment and records"
-      icon={<GraduationCap className="h-6 w-6 text-white" />}
-      columns={columns}
-      data={students}
-      formFields={formFields}
-      onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
+    <StudentsLayout
+      // title="Students"
+      // description="Manage student enrollment and records"
+      // icon={<GraduationCap className="h-6 w-6 text-white" />}
+      // columns={columns}
+      // data={students}
+      // formFields={formFields}
+      // onAdd={handleAdd}
+      // onEdit={handleEdit}
+      // onDelete={handleDelete}
     />
   )
 }

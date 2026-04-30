@@ -22,9 +22,9 @@ interface DataPageLayoutProps<T extends { id: number }> {
     placeholder?: string
     options?: { label: string; value: string }[]
   }[]
-  onAdd: (item: Partial<T>) => void
-  onEdit: (item: T) => void
-  onDelete: (id: number) => void
+  // onAdd: (item: Partial<T>) => void
+  // onEdit: (item: T) => void
+  // onDelete: (id: number) => void
 }
 
 // Custom Dropdown Component
@@ -140,6 +140,13 @@ export function Badge({
     </span>
   )
 }
+interface Feature {
+  id: number
+  feature_id?: number
+  feature_name: string
+  name?: string
+}
+
 
 export function DataPageLayout<T extends { id: number }>({
   title,
@@ -147,10 +154,8 @@ export function DataPageLayout<T extends { id: number }>({
   icon,
   columns,
   data,
-  formFields,
-  onAdd,
-  onEdit,
-  onDelete,
+  formFields
+
 }: DataPageLayoutProps<T>) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -162,6 +167,23 @@ export function DataPageLayout<T extends { id: number }>({
       String(value).toLowerCase().includes(searchQuery.toLowerCase())
     )
   )
+
+    const onAdd = (item: Partial<Feature>) => {
+    // const newFeature: Feature = {
+    //   id: features.length > 0 ? Math.max(...features.map(f => f.id || 0)) + 1 : 1,
+    //   feature_id: features.length > 0 ? Math.max(...features.map(f => f.feature_id || 0)) + 1 : 1,
+    //   feature_name: item.feature_name || "",
+    // }
+    // setFeatures([...features, newFeature])
+  }
+
+  const onEdit = (item: Feature) => {
+    //setFeatures(features.map((f) => (f.id === item.id ? item : f)))
+  }
+
+  const onDelete = (id: number) => {
+    // setFeatures(features.filter((f) => f.id !== id))
+  }
 
   const handleOpenDialog = (item?: T) => {
     if (item) {
@@ -180,7 +202,7 @@ export function DataPageLayout<T extends { id: number }>({
 
   const handleSubmit = () => {
     if (editingItem) {
-      onEdit({ ...editingItem, ...formData } as T)
+      // onEdit({ ...editingItem, ...formData } as T)
     } else {
       onAdd(formData as Partial<T>)
     }
