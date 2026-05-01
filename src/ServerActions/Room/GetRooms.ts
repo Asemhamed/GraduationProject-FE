@@ -3,10 +3,10 @@
 import { getToken } from "@/Cookies/auth.actions";
 import { RoomsResponse } from "@/Types/RoomsType";
 
-export async function GetRooms(): Promise<RoomsResponse > {
+export async function GetRooms(skip: number = 0, limit: number = 100): Promise<RoomsResponse > {
     const token = await getToken();
   try {
-    const response = await fetch("http://localhost:8000/api/facilities/rooms?skip=0&limit=100", {
+    const response = await fetch(`http://localhost:8000/api/facilities/rooms?skip=${skip}&limit=${limit}`, {
       method: "GET",
       headers: {
         "Accept": "application/json",

@@ -1,35 +1,39 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useUserData } from "@/Context/UserData"
 import {
-  LayoutDashboard,
-  Sparkles,
-  DoorOpen,
-  Users,
   BookOpen,
-  GraduationCap,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  X,
+  DoorOpen,
+  GraduationCap,
+  LayoutDashboard,
   LogOut,
+  Menu,
+  Sparkles,
+  Users,
+  UserStar,
+  X
 } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useState } from "react"
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/features", label: "Features", icon: Sparkles },
   { href: "/admin/rooms", label: "Rooms", icon: DoorOpen },
-  { href: "/admin/instructors", label: "Instructors", icon: Users },
   { href: "/admin/courses", label: "Courses", icon: BookOpen },
+  { href: "/admin/admins", label: "Admins", icon: UserStar},
+  { href: "/admin/instructors", label: "Instructors", icon: Users },
   { href: "/admin/students", label: "Students", icon: GraduationCap },
 ]
 
 export function AdminSidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const {email} = useUserData();
 
   return (
     <>
@@ -122,7 +126,7 @@ export function AdminSidebar() {
             {!collapsed && (
               <div className="flex-1 overflow-hidden">
                 <p className="truncate text-sm font-medium text-foreground">Admin User</p>
-                <p className="truncate text-xs text-muted-foreground">admin@eduadmin.com</p>
+                <p className="truncate text-xs text-muted-foreground">{email}</p>
               </div>
             )}
             {!collapsed && (

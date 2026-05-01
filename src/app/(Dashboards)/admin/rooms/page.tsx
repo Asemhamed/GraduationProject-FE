@@ -1,4 +1,4 @@
-import { GetRooms } from "@/ServerAPIs/GetRooms";
+import { GetRooms } from "@/ServerActions/Room/GetRooms";
 import { Feature, Room } from "@/Types/RoomsType";
 import RoomsLayout from "../_Components/rooms-layout";
 

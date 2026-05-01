@@ -1,73 +1,18 @@
 "use client"
 
-import { CreateRoom } from "@/ServerAPIs/CreateRoom"
+import { CreateRoom } from "@/ServerActions/Room/CreateRoom"
+import { DeleteRoom } from "@/ServerActions/Room/DeleteRoom"
+import { UpdateRoom } from "@/ServerActions/Room/UpdateRoom"
+import { GetRooms } from "@/ServerActions/Room/GetRooms" // Ensure this exists
 import { Feature, Room, RoomFormData } from "@/Types/RoomsType"
-import { DoorOpen, Loader2, MoreHorizontal, Pencil, Plus, Search, Trash2, Users, X } from "lucide-react"
+import { DoorOpen, Loader2, MoreHorizontal, Pencil, Plus, Search, Trash2, Users, X, ArrowRight } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+import { toast } from 'react-toastify';
+import { ActionDropdown } from "@/app/_Components/Shared/ActionDropdown"
+import { Modal } from "@/app/_Components/Shared/Modal"
 
 
-function ActionDropdown({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false)
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  return (
-    <div ref={ref} className="relative ">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
-      >
-        <MoreHorizontal className="h-4 w-4" />
-      </button>
-      {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-32 rounded-xl border border-slate-200 bg-white p-1 shadow-xl animate-in fade-in zoom-in duration-100">
-          <button
-            onClick={() => { onEdit(); setOpen(false); }}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-          >
-            <Pencil className="h-3.5 w-3.5" /> Edit
-          </button>
-          <button
-            onClick={() => { onDelete(); setOpen(false); }}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
-          >
-            <Trash2 className="h-3.5 w-3.5" /> Delete
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function Modal({ open, onClose, title, description, children }: any) {
-  if (!open) return null
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-50 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-        <div className="mb-5 flex items-start justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-            <p className="text-sm text-slate-500 mt-1">{description}</p>
-          </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  )
-}
 
 // --- Main Room Component ---
 
@@ -75,6 +20,12 @@ export default function RoomsLayout({ rooms, availableFeatures }: { rooms: Room[
   const [data, setData] = useState<Room[]>(rooms)
   const [searchQuery, setSearchQuery] = useState("")
   
+  // Pagination State
+  const [skip, setSkip] = useState(0)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(rooms.length === 100)
+  const LIMIT = 100
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Room | null>(null)
   
@@ -85,10 +36,31 @@ export default function RoomsLayout({ rooms, availableFeatures }: { rooms: Room[
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<RoomFormData>()
 
-  const filteredData = data.filter(item => 
-    item.room_id.toString().includes(searchQuery) ||
-    item.features.some(f => f.feature_name.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
+  const filteredData = data
+    .filter(item => 
+      item.room_id.toString().includes(searchQuery) ||
+      item.features.some(f => f.feature_name.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+    .sort((a, b) => a.room_id - b.room_id)
+
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true)
+    try {
+      const nextSkip = skip + LIMIT
+      const newRooms = await GetRooms(nextSkip, LIMIT)
+      
+      if (newRooms.length < LIMIT) {
+        setHasMore(false)
+      }
+
+      setData((prev) => [...prev, ...newRooms])
+      setSkip(nextSkip)
+    } catch (error) {
+      toast.error("Failed to load more rooms")
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
 
   const handleOpenDialog = (room?: Room) => {
     if (room) {
@@ -107,19 +79,25 @@ export default function RoomsLayout({ rooms, availableFeatures }: { rooms: Room[
   const onSubmit = async (formData: RoomFormData) => {
     setIsSubmitting(true)
     try {
-      // Simulate mapping the selected IDs back to feature objects for the UI
-      const selectedFeatures = availableFeatures.filter(f => 
-        formData.feature_ids.map(Number).includes(f.feature_id)
-      )
+      const numericFeatureIds = formData.feature_ids.map(Number);
 
       if (editingItem) {
-        setData(data.map(r => r.room_id === editingItem.room_id ? { ...r, capacity: formData.capacity, features: selectedFeatures } : r))
-        toast.success("Room updated successfully")
+        const updatedRoomFromServer = await UpdateRoom(
+          editingItem.room_id,
+          formData.capacity,
+          numericFeatureIds
+        );
+
+        setData((prev) =>
+          prev.map((r) =>
+            r.room_id === editingItem.room_id ? updatedRoomFromServer : r
+          )
+        );
+        toast.success("Room updated successfully");
       } else {
-      const newRoomFromServer = await CreateRoom(formData);
-      
-      setData((prev) => [...prev, newRoomFromServer]);
-      toast.success("Room created successfully");
+        const newRoomFromServer = await CreateRoom(formData);
+        setData((prev) => [...prev, newRoomFromServer]);
+        toast.success("Room created successfully");
       }
       setIsDialogOpen(false)
     } finally {
@@ -132,12 +110,22 @@ export default function RoomsLayout({ rooms, availableFeatures }: { rooms: Room[
     setIsDeleteModalOpen(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (itemToDelete) {
-      setData(data.filter(r => r.room_id !== itemToDelete))
-      toast.success("Room deleted successfully.")
-      setIsDeleteModalOpen(false)
-      setItemToDelete(null)
+      setIsSubmitting(true);
+      try {
+        const success = await DeleteRoom(itemToDelete);
+        if (success) {
+          setData(data.filter(r => r.room_id !== itemToDelete));
+          toast.success("Room deleted successfully.");
+          setIsDeleteModalOpen(false);
+          setItemToDelete(null);
+        }
+      } catch (error: any) {
+        toast.error(error.message || "Failed to delete room.");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   }
 
@@ -156,14 +144,14 @@ export default function RoomsLayout({ rooms, availableFeatures }: { rooms: Room[
         </div>
         <button
           onClick={() => handleOpenDialog()}
-          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 cursor-pointer px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-indigo-700 transition-all active:scale-95"
+          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 cursor-pointer px-6 py-3 text-sm font-bold text-white shadow-lg hover:shadow-indigo-200 hover:-translate-y-0.5 transition-all active:scale-95"
         >
           <Plus className="h-5 w-5" />
           Add Room
         </button>
       </div>
 
-      {/* Table */}
+      {/* Table Section */}
       <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-50 bg-slate-50/30">
           <div className="relative max-w-sm">
@@ -218,6 +206,29 @@ export default function RoomsLayout({ rooms, availableFeatures }: { rooms: Room[
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Footer */}
+        <div className="p-6 bg-slate-50/30 border-t border-slate-100 flex items-center justify-between">
+          <p className="text-sm text-slate-500 font-medium">
+            Total <span className="text-slate-900 font-bold">{data.length}</span> rooms loaded
+          </p>
+          {hasMore && (
+            <button
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            >
+              {isLoadingMore ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  Load Next 100
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Form Modal */}
@@ -262,14 +273,14 @@ export default function RoomsLayout({ rooms, availableFeatures }: { rooms: Room[
             <button 
               type="button" 
               onClick={() => setIsDialogOpen(false)} 
-              className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-70"
+              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-70 cursor-pointer shadow-lg shadow-indigo-100"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingItem ? "Update Room" : "Save Room"}
@@ -278,25 +289,17 @@ export default function RoomsLayout({ rooms, availableFeatures }: { rooms: Room[
         </form>
       </Modal>
 
-      {/* Delete Confirmation Modal[cite: 1] */}
-      <Modal
-        open={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        title="Confirm Deletion"
-        description="Are you sure you want to delete this room? This action cannot be undone."
-      >
-        <div className="flex flex-col gap-6">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
-            <Trash2 className="h-6 w-6" />
-          </div>
-          <div className="flex justify-end gap-3">
-            <button onClick={() => setIsDeleteModalOpen(false)} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
-              Cancel
-            </button>
-            <button onClick={confirmDelete} className="rounded-xl bg-red-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-red-700 shadow-md shadow-red-100 active:scale-95 transition-all">
-              Delete Room
-            </button>
-          </div>
+      {/* Delete Confirmation Modal */}
+      <Modal open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Confirm Deletion" description="Are you sure you want to delete this room? This action cannot be undone.">
+        <div className="flex justify-end gap-3 mt-6">
+          <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-sm font-bold text-slate-500 cursor-pointer">Cancel</button>
+          <button 
+            onClick={confirmDelete} 
+            disabled={isSubmitting}
+            className="rounded-xl bg-red-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+          >
+            {isSubmitting ? "Deleting..." : "Confirm Delete"}
+          </button>
         </div>
       </Modal>
     </div>

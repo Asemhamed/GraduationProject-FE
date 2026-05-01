@@ -3,10 +3,10 @@
 import { getToken } from "@/Cookies/auth.actions";
 
 
-export async function GetFeaturs(): Promise<any> {
+export async function GetFeatures(skip: number = 0, limit: number = 100): Promise<any> {
   const token = await getToken();
   try {
-    const response = await fetch("http://localhost:8000/api/facilities/features?skip=0&limit=100", {
+    const response = await fetch(`http://localhost:8000/api/facilities/features?skip=${skip}&limit=${limit}`, {
       method: "GET",
       headers: {
         "Accept": "application/json",

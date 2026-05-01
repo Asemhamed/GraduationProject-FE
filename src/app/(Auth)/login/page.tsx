@@ -1,12 +1,10 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useUserData } from '@/Context/UserData'
 import { setToken } from '@/Cookies/auth.actions'
 import { LoginSchema, LoginType } from '@/Schema/AuthScheema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, GraduationCap, IdCard, Lock, User } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, GraduationCap, IdCard, Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -16,7 +14,7 @@ import { Bounce } from "react-toastify/unstyled"
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const {setToken:setTokenContext}=useUserData()
+  const {setToken:setTokenContext,setEmail,setRole}=useUserData();
   const router = useRouter();
 
 
@@ -54,8 +52,14 @@ export default function LoginPage() {
           theme: "light",
           transition: Bounce,
 }); 
+
         setTokenContext(result.access_token);
+        localStorage.setItem('token', result.access_token);
         await setToken(result.access_token);
+        setRole(result.user.role);
+        localStorage.setItem('role', result.user.role);
+        setEmail(result.user.email);
+        localStorage.setItem('email', result.user.email);
         reset();
         setTimeout(() => {
           router.push("/");
@@ -169,11 +173,22 @@ export default function LoginPage() {
                     <Lock className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     {...register('password')}
                     placeholder="••••••••"
                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B6EE1] focus:border-transparent transition-all"
                   />
+                  <button
+                    type="button" // Important: set to button so it doesn't trigger form submit
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) :  (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
                 </div>
                 {formState.errors.password && (
                   <p className="text-red-500 text-sm mt-1">

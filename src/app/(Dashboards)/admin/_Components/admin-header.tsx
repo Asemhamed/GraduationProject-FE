@@ -7,8 +7,9 @@ const pageTitles: Record<string, string> = {
   "/admin": "Dashboard",
   "/admin/features": "Features",
   "/admin/rooms": "Rooms",
-  "/admin/instructors": "Instructors",
   "/admin/courses": "Courses",
+  "/admin/admins": "Admins",
+  "/admin/instructors": "Instructors",
   "/admin/students": "Students",
 }
 
@@ -24,13 +25,7 @@ export function AdminHeader() {
 
       <div className="flex items-center gap-3">
 
-        {/* Notifications */}
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white shadow-sm">
-            3
-          </span>
-        </button>
+        
 
         {/* Profile */}
         <div className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm md:flex">

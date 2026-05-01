@@ -1,434 +1,334 @@
-// "use client"
+"use client"
 
-// import { useState, useRef, useEffect } from "react"
-// import { Plus, Search, MoreHorizontal, Pencil, Trash2, X } from "lucide-react"
+import {
+  ArrowRight,
+  Calendar,
+  GraduationCap, Loader2,
+  Lock,
+  Mail,
+  Plus, Search,
+  User
+} from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "react-toastify"
 
-// interface Student {
-//   id: number
-//   name: string
-//   email: string
-//   enrolledCourses: number
-//   completedCourses: number
-//   progress: number
-//   status: string
-//   enrolledAt: string
-// }
+// Import Server Actions
+import { CreateStudent } from "@/ServerActions/Student/CreateStudent"
+import { DeleteStudent } from "@/ServerActions/Student/DeleteStudent"
+import { GetStudents } from "@/ServerActions/Student/GetStudents"
+import { UpdateStudent } from "@/ServerActions/Student/UpdateStudent"
+import { Student, StudentFormData } from "@/Types/StudentTypes"
+import { ActionDropdown } from "@/app/_Components/Shared/ActionDropdown"
+import { Modal } from "@/app/_Components/Shared/Modal"
 
-// interface Column<T> {
-//   key: keyof T | string
-//   label: string
-//   render?: (item: T) => React.ReactNode
-// }
+// --- Main Layout ---
 
-// interface StudentsLayoutProps {
-//   title: string
-//   description: string
-//   icon: React.ReactNode
-//   columns: Column<Student>[]
-//   data: Student[]
-//   formFields: {
-//     key: string
-//     label: string
-//     type: "text" | "email" | "number" | "select" | "textarea"
-//     placeholder?: string
-//     options?: { label: string; value: string }[]
-//   }[]
-//   onAdd: (item: Partial<Student>) => void
-//   onEdit: (item: Student) => void
-//   onDelete: (id: number) => void
-// }
+export default function StudentsLayout({ initialStudents }: { initialStudents: Student[] }) {
+  const [data, setData] = useState<Student[]>(initialStudents)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<Student | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Pagination State
+  const [skip, setSkip] = useState(0)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(initialStudents.length === 100)
+  const LIMIT = 100
 
-// function ActionDropdown({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
-//   const [open, setOpen] = useState(false)
-//   const ref = useRef<HTMLDivElement>(null)
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<StudentFormData>()
 
-//   useEffect(() => {
-//     function handleClickOutside(event: MouseEvent) {
-//       if (ref.current && !ref.current.contains(event.target as Node)) {
-//         setOpen(false)
-//       }
-//     }
-//     document.addEventListener("mousedown", handleClickOutside)
-//     return () => document.removeEventListener("mousedown", handleClickOutside)
-//   }, [])
+  const filteredData = data.filter(item =>
+    item.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.student_id.toString().includes(searchQuery)
+  ).sort((a, b) => a.student_id - b.student_id);
 
-//   return (
-//     <div ref={ref} className="relative">
-//       <button
-//         onClick={() => setOpen(!open)}
-//         className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-//       >
-//         <MoreHorizontal className="h-4 w-4" />
-//       </button>
-//       {open && (
-//         <div className="absolute right-0 top-full z-50 mt-1 w-36 rounded-xl border border-border bg-card p-1 shadow-lg">
-//           <button
-//             onClick={() => {
-//               onEdit()
-//               setOpen(false)
-//             }}
-//             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
-//           >
-//             <Pencil className="h-4 w-4" />
-//             Edit
-//           </button>
-//           <button
-//             onClick={() => {
-//               onDelete()
-//               setOpen(false)
-//             }}
-//             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950"
-//           >
-//             <Trash2 className="h-4 w-4" />
-//             Delete
-//           </button>
-//         </div>
-//       )}
-//     </div>
-//   )
-// }
+  const handleOpenDialog = (student?: Student) => {
+    if (student) {
+      setEditingItem(student)
+      reset({ full_name: student.full_name, semester: student.semester, email: "", password: "" })
+    } else {
+      setEditingItem(null)
+      reset({ full_name: "", semester: "Fall", email: "", password: "" })
+    }
+    setIsDialogOpen(true)
+  }
 
-// function Modal({
-//   open,
-//   onClose,
-//   title,
-//   description,
-//   children,
-// }: {
-//   open: boolean
-//   onClose: () => void
-//   title: string
-//   description: string
-//   children: React.ReactNode
-// }) {
-//   if (!open) return null
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true)
+    try {
+      const nextSkip = skip + LIMIT
+      const newStudents = await GetStudents(nextSkip, LIMIT)
+      
+      if (newStudents.length < LIMIT) {
+        setHasMore(false)
+      }
 
-//   return (
-//     <div className="fixed inset-0 z-50 flex items-center justify-center">
-//       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-//       <div className="relative z-50 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
-//         <div className="mb-4 flex items-start justify-between">
-//           <div>
-//             <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-//             <p className="text-sm text-muted-foreground">{description}</p>
-//           </div>
-//           <button
-//             onClick={onClose}
-//             className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-//           >
-//             <X className="h-4 w-4" />
-//           </button>
-//         </div>
-//         {children}
-//       </div>
-//     </div>
-//   )
-// }
+      setData((prev) => [...prev, ...newStudents])
+      setSkip(nextSkip)
+    } catch (error) {
+      toast.error("Failed to load more records")
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
 
-// export function Badge({
-//   children,
-//   variant = "default",
-//   className = "",
-// }: {
-//   children: React.ReactNode
-//   variant?: "default" | "secondary" | "outline" | "destructive"
-//   className?: string
-// }) {
-//   const baseStyles = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors"
-//   const variants = {
-//     default: "bg-primary text-primary-foreground",
-//     secondary: "bg-muted text-muted-foreground",
-//     outline: "border border-border text-foreground",
-//     destructive: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400",
-//   }
+  const onSubmit = async (formData: StudentFormData) => {
+    setIsSubmitting(true)
+    try {
+      if (editingItem) {
+        const updatedStudent = await UpdateStudent(editingItem.student_id, {
+          full_name: formData.full_name,
+          semester: formData.semester
+        })
+        setData(data.map(s => s.student_id === editingItem.student_id ? updatedStudent : s))
+        toast.success("Student updated successfully")
+      } else {
+        const newStudent = await CreateStudent(formData)
+        setData(prev => [newStudent, ...prev])
+        toast.success("Student enrolled successfully")
+      }
+      setIsDialogOpen(false)
+      reset()
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-//   return (
-//     <span className={`${baseStyles} ${variants[variant]} ${className}`}>
-//       {children}
-//     </span>
-//   )
-// }
+  const confirmDelete = async () => {
+    if (!itemToDelete) return
+    setIsSubmitting(true)
+    try {
+      await DeleteStudent(itemToDelete)
+      setData(data.filter(s => s.student_id !== itemToDelete))
+      toast.success("Student deleted")
+      setIsDeleteModalOpen(false)
+    } catch (error: any) {
+      toast.error("Failed to delete")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-// export function StudentsLayout({
-//   title,
-//   description,
-//   icon,
-//   columns,
-//   data,
-//   formFields,
-//   onAdd,
-//   onEdit,
-//   onDelete,
-// }: StudentsLayoutProps) {
-//   const [searchQuery, setSearchQuery] = useState("")
-//   const [isDialogOpen, setIsDialogOpen] = useState(false)
-//   const [editingItem, setEditingItem] = useState<Student | null>(null)
-//   const [formData, setFormData] = useState<Record<string, string>>({})
+  return (
+    <div className="max-w-6xl mx-auto p-8 space-y-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-100 pb-8">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-500 shadow-xl shadow-blue-100">
+            <GraduationCap className="h-7 w-7 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Students</h1>
+            <p className="text-slate-500 font-medium">Manage student accounts and enrollment</p>
+          </div>
+        </div>
+        <button
+          onClick={() => handleOpenDialog()}
+          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-6 py-3 text-sm font-bold text-white shadow-lg hover:shadow-indigo-200 hover:-translate-y-0.5 transition-all active:scale-95 cursor-pointer"
+        >
+          <Plus className="h-5 w-5" />
+          Enroll Student
+        </button>
+      </div>
 
-//   const filteredData = data.filter((item) =>
-//     Object.values(item).some((value) =>
-//       String(value).toLowerCase().includes(searchQuery.toLowerCase())
-//     )
-//   )
+      {/* Search & Table */}
+      <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-50 bg-slate-50/30">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="search"
+              placeholder="Search students..."
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
 
-//   const handleOpenDialog = (item?: Student) => {
-//     if (item) {
-//       setEditingItem(item)
-//       const newFormData: Record<string, string> = {}
-//       formFields.forEach((field) => {
-//         newFormData[field.key] = String((item as Record<string, unknown>)[field.key] || "")
-//       })
-//       setFormData(newFormData)
-//     } else {
-//       setEditingItem(null)
-//       setFormData({})
-//     }
-//     setIsDialogOpen(true)
-//   }
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50/50">
+                <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">ID</th>
+                <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Student Name</th>
+                <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Semester</th>
+                <th className="px-8 py-4 text-right text-xs font-bold uppercase tracking-widest text-slate-400">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredData.map((student) => (
+                <tr key={student.student_id} className="group hover:bg-blue-50/30 transition-colors">
+                  <td className="px-8 py-5 text-sm font-mono text-blue-600 font-semibold">#{student.student_id}</td>
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
+                        {student.full_name.charAt(0)}
+                      </div>
+                      <span className="text-sm font-bold text-slate-700">{student.full_name}</span>
+                    </div>
+                  </td>
+                  <td className="px-8 py-5">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-100">
+                      <Calendar className="h-3 w-3" />
+                      {student.semester}
+                    </span>
+                  </td>
+                  <td className="px-8 py-5 text-right">
+                    <ActionDropdown 
+                      onEdit={() => handleOpenDialog(student)} 
+                      onDelete={() => { setItemToDelete(student.student_id); setIsDeleteModalOpen(true); }} 
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-//   const handleSubmit = () => {
-//     if (editingItem) {
-//       onEdit({ ...editingItem, ...formData } as Student)
-//     } else {
-//       onAdd(formData as Partial<Student>)
-//     }
-//     setIsDialogOpen(false)
-//     setFormData({})
-//     setEditingItem(null)
-//   }
+        {/* Pagination Footer */}
+        <div className="p-6 bg-slate-50/30 border-t border-slate-100 flex items-center justify-between">
+          <p className="text-sm text-slate-500 font-medium">
+            Showing <span className="text-slate-900 font-bold">{data.length}</span> records
+          </p>
+          {hasMore && (
+            <button
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            >
+              {isLoadingMore ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  Load Next 100
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
 
-//   const getValue = (item: Student, key: string): unknown => {
-//     return (item as Record<string, unknown>)[key]
-//   }
+      {/* Create/Edit Modal */}
+      <Modal
+        open={isDialogOpen}
+        onClose={() => !isSubmitting && setIsDialogOpen(false)}
+        title={editingItem ? "Edit Student" : "New Enrollment"}
+        description={editingItem ? "Update basic info." : "Create account and student profile."}
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-tight">Full Name</label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                {...register("full_name", { required: "Required" })}
+                className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all shadow-sm focus:ring-4 focus:ring-blue-500/5"
+                placeholder="John Doe"
+              />
+            </div>
+            {errors.full_name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.full_name.message}
+                  </p>
+                )}
+          </div>
 
-//   return (
-//     <div className="space-y-6">
-//       {/* Header */}
-//       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-//         <div className="flex items-center gap-3">
-//           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-lg">
-//             {icon}
-//           </div>
-//           <div>
-//             <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
-//             <p className="text-sm text-muted-foreground">{description}</p>
-//           </div>
-//         </div>
-//         <button
-//           onClick={() => handleOpenDialog()}
-//           className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg transition-all hover:shadow-xl hover:shadow-primary/25"
-//         >
-//           <Plus className="h-4 w-4" />
-//           Add New
-//         </button>
-//       </div>
+          {!editingItem && (
+            <>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-tight">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    {...register("email", { required: !editingItem })}
+                    type="email"
+                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all shadow-sm focus:ring-4 focus:ring-blue-500/5"
+                    placeholder="student@example.com"
+                  />
+                </div>
+                    {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-tight">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    {...register("password", { required: !editingItem })}
+                    type="password"
+                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all shadow-sm focus:ring-4 focus:ring-blue-500/5"
+                    placeholder="••••••••"
+                  />
+                </div>
+                  {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
 
-//       {/* Main Content */}
-//       <div className="rounded-2xl border border-border bg-card">
-//         <div className="flex flex-col gap-4 border-b border-border p-5 sm:flex-row sm:items-center sm:justify-between">
-//           <div>
-//             <h2 className="font-semibold text-foreground">All {title}</h2>
-//             <p className="text-sm text-muted-foreground">{data.length} total entries</p>
-//           </div>
-//           <div className="relative w-full sm:w-64">
-//             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-//             <input
-//               type="search"
-//               placeholder="Search..."
-//               className="h-10 w-full rounded-xl border border-border bg-muted/50 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
-//               value={searchQuery}
-//               onChange={(e) => setSearchQuery(e.target.value)}
-//             />
-//           </div>
-//         </div>
-//         <div className="p-5">
-//           {/* Desktop Table */}
-//           <div className="hidden md:block">
-//             <div className="overflow-x-auto">
-//               <table className="w-full">
-//                 <thead>
-//                   <tr className="border-b border-border">
-//                     {columns.map((column) => (
-//                       <th
-//                         key={String(column.key)}
-//                         className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-//                       >
-//                         {column.label}
-//                       </th>
-//                     ))}
-//                     <th className="w-[70px] pb-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-//                       Actions
-//                     </th>
-//                   </tr>
-//                 </thead>
-//                 <tbody className="divide-y divide-border">
-//                   {filteredData.length === 0 ? (
-//                     <tr>
-//                       <td colSpan={columns.length + 1} className="py-8 text-center">
-//                         <p className="text-muted-foreground">No data found</p>
-//                       </td>
-//                     </tr>
-//                   ) : (
-//                     filteredData.map((item) => (
-//                       <tr key={item.id} className="group transition-colors hover:bg-muted/50">
-//                         {columns.map((column) => (
-//                           <td key={String(column.key)} className="py-4 text-sm text-foreground">
-//                             {column.render
-//                               ? column.render(item)
-//                               : String(getValue(item, String(column.key)) || "")}
-//                           </td>
-//                         ))}
-//                         <td className="py-4 text-right">
-//                           <ActionDropdown
-//                             onEdit={() => handleOpenDialog(item)}
-//                             onDelete={() => onDelete(item.id)}
-//                           />
-//                         </td>
-//                       </tr>
-//                     ))
-//                   )}
-//                 </tbody>
-//               </table>
-//             </div>
-//           </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-tight">Semester</label>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <select
+                {...register("semester", { required: "Required" })}
+                className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all appearance-none bg-white shadow-sm focus:ring-4 focus:ring-blue-500/5"
+              >
+                <option value="Fall">Fall</option>
+                <option value="Spring">Spring</option>
+                <option value="Summer">Summer</option>
+              </select>
+            </div>
+          </div>
 
-//           {/* Mobile Cards */}
-//           <div className="grid gap-4 md:hidden">
-//             {filteredData.length === 0 ? (
-//               <div className="py-8 text-center">
-//                 <p className="text-muted-foreground">No data found</p>
-//               </div>
-//             ) : (
-//               filteredData.map((item) => (
-//                 <div
-//                   key={item.id}
-//                   className="space-y-3 rounded-xl border border-border bg-muted/30 p-4"
-//                 >
-//                   <div className="flex items-start justify-between">
-//                     <div className="space-y-1">
-//                       {columns.slice(0, 2).map((column) => (
-//                         <div key={String(column.key)}>
-//                           {column.render ? (
-//                             column.render(item)
-//                           ) : (
-//                             <p
-//                               className={
-//                                 column.key === columns[0].key
-//                                   ? "font-medium text-foreground"
-//                                   : "text-sm text-muted-foreground"
-//                               }
-//                             >
-//                               {String(getValue(item, String(column.key)) || "")}
-//                             </p>
-//                           )}
-//                         </div>
-//                       ))}
-//                     </div>
-//                     <ActionDropdown
-//                       onEdit={() => handleOpenDialog(item)}
-//                       onDelete={() => onDelete(item.id)}
-//                     />
-//                   </div>
-//                   {columns.length > 2 && (
-//                     <div className="flex flex-wrap gap-2 border-t border-border pt-3">
-//                       {columns.slice(2).map((column) => (
-//                         <div key={String(column.key)} className="text-xs">
-//                           <span className="text-muted-foreground">{column.label}: </span>
-//                           {column.render ? (
-//                             column.render(item)
-//                           ) : (
-//                             <span className="text-foreground">
-//                               {String(getValue(item, String(column.key)) || "")}
-//                             </span>
-//                           )}
-//                         </div>
-//                       ))}
-//                     </div>
-//                   )}
-//                 </div>
-//               ))
-//             )}
-//           </div>
-//         </div>
-//       </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <button 
+                type="button" 
+                disabled={isSubmitting}
+                onClick={() => setIsDialogOpen(false)} 
+                className="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50 transition-all cursor-pointer shadow-lg shadow-blue-100"
+            >
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {editingItem ? "Save Changes" : "Create Student"}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
-//       {/* Add/Edit Modal */}
-//       <Modal
-//         open={isDialogOpen}
-//         onClose={() => setIsDialogOpen(false)}
-//         title={`${editingItem ? "Edit" : "Add New"} ${title.slice(0, -1)}`}
-//         description={
-//           editingItem
-//             ? `Update the ${title.toLowerCase().slice(0, -1)} details below.`
-//             : `Fill in the details to add a new ${title.toLowerCase().slice(0, -1)}.`
-//         }
-//       >
-//         <div className="space-y-4">
-//           {formFields.map((field) => (
-//             <div key={field.key} className="space-y-2">
-//               <label htmlFor={field.key} className="text-sm font-medium text-foreground">
-//                 {field.label}
-//               </label>
-//               {field.type === "select" ? (
-//                 <select
-//                   id={field.key}
-//                   value={formData[field.key] || ""}
-//                   onChange={(e) =>
-//                     setFormData({ ...formData, [field.key]: e.target.value })
-//                   }
-//                   className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-//                 >
-//                   <option value="">Select {field.label}</option>
-//                   {field.options?.map((option) => (
-//                     <option key={option.value} value={option.value}>
-//                       {option.label}
-//                     </option>
-//                   ))}
-//                 </select>
-//               ) : field.type === "textarea" ? (
-//                 <textarea
-//                   id={field.key}
-//                   placeholder={field.placeholder}
-//                   value={formData[field.key] || ""}
-//                   onChange={(e) =>
-//                     setFormData({ ...formData, [field.key]: e.target.value })
-//                   }
-//                   className="min-h-[80px] w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-//                 />
-//               ) : (
-//                 <input
-//                   id={field.key}
-//                   type={field.type}
-//                   placeholder={field.placeholder}
-//                   value={formData[field.key] || ""}
-//                   onChange={(e) =>
-//                     setFormData({ ...formData, [field.key]: e.target.value })
-//                   }
-//                   className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-//                 />
-//               )}
-//             </div>
-//           ))}
-//           <div className="flex justify-end gap-3 pt-4">
-//             <button
-//               onClick={() => setIsDialogOpen(false)}
-//               className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-//             >
-//               Cancel
-//             </button>
-//             <button
-//               onClick={handleSubmit}
-//               className="rounded-xl bg-gradient-to-r from-primary to-primary/80 px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg transition-all hover:shadow-xl hover:shadow-primary/25"
-//             >
-//               {editingItem ? "Save Changes" : "Add"}
-//             </button>
-//           </div>
-//         </div>
-//       </Modal>
-//     </div>
-//   )
-// }
-
-export default function StudentsLayout(){
-    return <div>Students Layout</div>
+      {/* Delete Confirmation */}
+      <Modal open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Confirm Deletion" description="Are you sure you want to delete this student? This action cannot be undone.">
+        <div className="flex justify-end gap-3 mt-6">
+          <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-sm font-bold text-slate-500 cursor-pointer">Cancel</button>
+          <button 
+            onClick={confirmDelete} 
+            disabled={isSubmitting}
+            className="rounded-xl bg-red-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+          >
+            {isSubmitting ? "Deleting..." : "Confirm Delete"}
+          </button>
+        </div>
+      </Modal>
+    </div>
+  )
 }
