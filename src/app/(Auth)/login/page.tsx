@@ -14,7 +14,7 @@ import { Bounce } from "react-toastify/unstyled"
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const {setToken:setTokenContext,setEmail,setRole}=useUserData();
+  const {setUser}=useUserData();
   const router = useRouter();
 
 
@@ -53,12 +53,14 @@ export default function LoginPage() {
           transition: Bounce,
 }); 
 
-        setTokenContext(result.access_token);
-        localStorage.setItem('token', result.access_token);
+        setUser({
+          token: result.access_token,
+          role: result.user.role,
+          email: result.user.email,
+          profile: result.user.profile
+        });
         await setToken(result.access_token);
-        setRole(result.user.role);
         localStorage.setItem('role', result.user.role);
-        setEmail(result.user.email);
         localStorage.setItem('email', result.user.email);
         reset();
         setTimeout(() => {

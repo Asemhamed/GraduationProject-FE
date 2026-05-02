@@ -16,8 +16,13 @@ export async function removeToken(): Promise<void> {
     cookieStore.delete("token");
 }
 
-export async function getToken(): Promise<string | null> {
+export async function getToken(): Promise<string | undefined> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token");
-    return token?.value || null;
+    return token?.value || undefined;
+}
+
+export async function deleteToken() {
+  const cookieStore = await cookies()
+  cookieStore.delete("token")
 }

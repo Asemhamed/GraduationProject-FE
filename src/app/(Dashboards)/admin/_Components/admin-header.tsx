@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { Bell, Search } from "lucide-react"
+import Link from "next/link"
 
 const pageTitles: Record<string, string> = {
   "/admin": "Dashboard",
@@ -28,9 +29,9 @@ export function AdminHeader() {
         
 
         {/* Profile */}
-        <div className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm md:flex">
+        <Link href="/admin/profile" className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm md:flex">
           A
-        </div>
+        </Link>
       </div>
     </header>
   )

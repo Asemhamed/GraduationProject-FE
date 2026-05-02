@@ -7,11 +7,12 @@ import { Provider } from 'react-redux'
 import { Bounce, ToastContainer } from 'react-toastify'
 
 export default function Providers({children}: {children:ReactNode}) {
+    
     return <>
         <Provider store={store} >
         <UserDataProvider>
             {children}
-                        <ToastContainer
+            <ToastContainer
                 position="bottom-right"
                 autoClose={5000}
                 hideProgressBar={false}

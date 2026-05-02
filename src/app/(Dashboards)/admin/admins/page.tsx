@@ -1,9 +1,11 @@
-import React from 'react'
+import { GetAdmins } from '@/ServerActions/Admin/GetAdmins';
+import AdminsLayout from '../_Components/admins-layout';
 
-export default function page() {
+export default async function page() {
+  const admins = await GetAdmins();
   return (
-    <div>
-        <h1 className="text-2xl font-bold">Admins Management</h1>
-    </div>
+    <AdminsLayout
+    initialAdmins={admins}
+    />
   )
 }

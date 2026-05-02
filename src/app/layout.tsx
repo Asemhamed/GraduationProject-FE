@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Exo } from "next/font/google";
 import Providers from './_Components/Providers/Providers';
 import "./globals.css";
+import { useUserData } from '@/Context/UserData';
 
 const exo = Exo({
   variable: "--font-exo",
@@ -20,6 +21,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html
       lang="en"

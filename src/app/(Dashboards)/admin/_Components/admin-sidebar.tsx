@@ -1,6 +1,8 @@
 "use client"
 
 import { useUserData } from "@/Context/UserData"
+import { useLogout } from "@/Hooks/useLogout"
+import { AdminResponse } from "@/Types/AdminTypes"
 import {
   BookOpen,
   ChevronLeft,
@@ -29,12 +31,11 @@ const navItems = [
   { href: "/admin/students", label: "Students", icon: GraduationCap },
 ]
 
-export function AdminSidebar() {
+export function AdminSidebar({ profile }: { profile: AdminResponse }) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false);
-  const {email} = useUserData();
-
+  const {isLoggingOut,logout}=useLogout();
   return (
     <>
       {/* Mobile menu button */}
@@ -120,17 +121,21 @@ export function AdminSidebar() {
         {/* Footer */}
         <div className="border-t border-border p-3">
           <div className={`flex items-center gap-3 rounded-xl bg-muted/50 p-3 ${collapsed ? "justify-center" : ""}`}>
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent/70 font-semibold text-white shadow-sm">
+            <Link href={'/admin/profile'} className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm">
               A
-            </div>
+            </Link>
             {!collapsed && (
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-sm font-medium text-foreground">Admin User</p>
-                <p className="truncate text-xs text-muted-foreground">{email}</p>
+                <p className="truncate text-sm font-medium text-foreground">{profile.full_name}</p>
+                <p className="truncate text-xs text-muted-foreground">{profile.title}</p>
               </div>
             )}
             {!collapsed && (
-              <button className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-background hover:text-foreground">
+              <button
+                onClick={logout}
+                disabled={isLoggingOut}
+                className="rounded-lg cursor-pointer p-2 text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+              >
                 <LogOut className="h-4 w-4" />
               </button>
             )}

@@ -1,39 +1,66 @@
-'use client';
-import { createContext, useContext, useEffect, useState } from "react";
+// context/UserDataContext.tsx
+'use client'
+
+import { getToken } from "@/Cookies/auth.actions"
+import { createContext, useContext, useEffect, useState } from "react"
+
+type UserData = {
+  token: string | undefined
+  role: string | undefined
+  email: string | undefined
+  profile: string | undefined
+}
 
 type UserDataContextType = {
-    token: string | undefined;
-    setToken: (token: string | undefined) => void;
-    role: string | undefined;
-    setRole: (role: string | undefined) => void;
-    email: string | undefined;
-    setEmail: (email: string | undefined) => void;
-};
+  user: UserData
+  setUser: (data: Partial<UserData>) => void
+  clearUser: () => void
+}
 
-const UserData = createContext<UserDataContextType | undefined>(undefined);
+const defaultUser: UserData = {
+  token: undefined,
+  role: undefined,
+  email: undefined,
+  profile: undefined,
+}
 
-export function UserDataProvider({ children }:{children: React.ReactNode}) {
-const [token, setToken] = useState<string | undefined>(undefined);
-    const [role, setRole] = useState<string | undefined>(undefined);
-    const [email, setEmail] = useState<string | undefined>(undefined);
+const UserDataContext = createContext<UserDataContextType | undefined>(undefined)
 
-    useEffect(() => {
-        setToken(localStorage.getItem('token') || undefined);
-        setRole(localStorage.getItem('role') || undefined);
-        setEmail(localStorage.getItem('email') || undefined);
-    }, []);
-    
-    return (
-        <UserData.Provider value={{ token, setToken, role, setRole, email, setEmail }}>
-            {children}
-        </UserData.Provider>
-    );
+export function UserDataProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUserState] = useState<UserData>(defaultUser)
+
+  useEffect(() => {
+    const init = async () => {
+      const token = await getToken()
+      setUserState({
+        token,
+        role:    localStorage.getItem("role")    ?? undefined,
+        email:   localStorage.getItem("email")   ?? undefined,
+        profile: localStorage.getItem("profile") ?? undefined,
+      })
+    }
+    init()
+  }, [])
+
+  const setUser = (data: Partial<UserData>) => {
+    setUserState(prev => ({ ...prev, ...data }))
+  }
+
+  const clearUser = () => {
+    setUserState(defaultUser)
+  }
+
+  return (
+    <UserDataContext.Provider value={{ user, setUser, clearUser }}>
+      {children}
+    </UserDataContext.Provider>
+  )
 }
 
 export function useUserData() {
-  const context = useContext(UserData);
-  if (context === undefined) {
-    throw new Error("useUserData must be used within a UserDataProvider");
+  const context = useContext(UserDataContext)
+  if (!context) {
+    throw new Error("useUserData must be used within a UserDataProvider")
   }
-  return context;
+  return context
 }

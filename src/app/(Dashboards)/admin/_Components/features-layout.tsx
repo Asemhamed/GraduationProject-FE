@@ -1,32 +1,17 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { Plus, Search, MoreHorizontal, Pencil, Trash2, X, Sparkles, Loader2, ArrowRight } from "lucide-react"
+import { Plus, Search, Sparkles, Loader2, ArrowRight, Hash } from "lucide-react"
 import { CreateFeature } from "@/ServerActions/Feature/CreateFeature"
 import { toast } from "react-toastify"
 import { DeleteFeature } from "@/ServerActions/Feature/DeleteFeature"
 import { UpdateFeature } from "@/ServerActions/Feature/UpdateFeature"
-import { GetFeatures } from "@/ServerActions/Feature/GetFeatures" // Ensure this server action exists
+import { GetFeatures } from "@/ServerActions/Feature/GetFeatures"
 import { Modal } from "@/app/_Components/Shared/Modal"
 import { ActionDropdown } from "@/app/_Components/Shared/ActionDropdown"
+import { Feature, FeatureFormData } from "@/Types/FeaturesType"
 
-interface Feature {
-  feature_id: number
-  feature_name: string
-}
-
-interface FeatureFormData {
-  feature_name: string
-}
-
-// --- Helper Components ---
-
-
-
-
-
-// --- Main Feature Component ---
 
 export default function FeaturesLayout({ features }: { features: Feature[] }) {
   const [data, setData] = useState<Feature[]>(features)
@@ -46,7 +31,6 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FeatureFormData>()
 
-  // Logic: Filter first, then Sort by ID ascending
   const filteredData = data
     .filter(item =>
       item.feature_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -137,31 +121,32 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-8 space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-500">
+      
       {/* Header Section */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-100 pb-8">
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-slate-100 pb-8">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-500 shadow-xl shadow-blue-200">
-            <Sparkles className="h-7 w-7 text-white" />
+          <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-500 shadow-xl shadow-blue-200">
+            <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Features</h1>
-            <p className="text-slate-500 font-medium">Manage platform features and capabilities</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Features</h1>
+            <p className="text-sm sm:text-base text-slate-500 font-medium">Manage platform features and capabilities</p>
           </div>
         </div>
         <button
           onClick={() => handleOpenDialog()}
-          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-6 py-3 text-sm font-bold text-white shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all active:scale-95 cursor-pointer w-full md:w-auto"
         >
           <Plus className="h-5 w-5" />
           Add Feature
         </button>
       </div>
 
-      {/* Main Table Card */}
-      <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-50 bg-slate-50/30">
-          <div className="relative max-w-sm">
+      {/* Main Table/List Card */}
+      <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-50 bg-slate-50/30">
+          <div className="relative w-full sm:max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="search"
@@ -173,7 +158,31 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile View: Cards */}
+        <div className="block md:hidden divide-y divide-slate-100">
+          {filteredData.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 italic">No features found.</div>
+          ) : (
+            filteredData.map((item) => (
+              <div key={item.feature_id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                <div className="flex flex-col gap-1">
+                   <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full w-fit">
+                    <Hash className="h-2.5 w-2.5" />
+                    {item.feature_id.toString().padStart(3, '0')}
+                   </div>
+                   <span className="text-sm font-bold text-slate-700">{item.feature_name}</span>
+                </div>
+                <ActionDropdown 
+                  onEdit={() => handleOpenDialog(item)} 
+                  onDelete={() => { setItemToDelete(item.feature_id); setIsDeleteModalOpen(true); }} 
+                />
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50/50">
@@ -185,9 +194,7 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
             <tbody className="divide-y divide-slate-100">
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="py-20 text-center">
-                    <p className="text-slate-400 italic">No features found.</p>
-                  </td>
+                  <td colSpan={3} className="py-20 text-center text-slate-400 italic">No features found.</td>
                 </tr>
               ) : (
                 filteredData.map((item) => (
@@ -198,7 +205,7 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
                     <td className="px-8 py-5 text-sm font-bold text-slate-700">
                       {item.feature_name}
                     </td>
-                    <td className="px-8 py-5 text-right ">
+                    <td className="px-8 py-5 text-right">
                       <ActionDropdown 
                         onEdit={() => handleOpenDialog(item)} 
                         onDelete={() => { setItemToDelete(item.feature_id); setIsDeleteModalOpen(true); }} 
@@ -212,15 +219,15 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
         </div>
 
         {/* Load More Pagination Footer */}
-        <div className="p-6 bg-slate-50/30 border-t border-slate-100 flex items-center justify-between">
-          <p className="text-sm text-slate-500 font-medium">
+        <div className="p-4 sm:p-6 bg-slate-50/30 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-slate-500 font-medium order-2 sm:order-1">
             Showing <span className="text-slate-900 font-bold">{data.length}</span> features
           </p>
           {hasMore && (
             <button
               onClick={handleLoadMore}
               disabled={isLoadingMore}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50 cursor-pointer w-full sm:w-auto order-1 sm:order-2"
             >
               {isLoadingMore ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -259,19 +266,19 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
               <p className="text-xs text-red-500 font-medium">{errors.feature_name.message}</p>
             )}
           </div>
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
             <button
               type="button"
               disabled={isSubmitting}
               onClick={() => setIsDialogOpen(false)}
-              className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+              className="px-5 py-3 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors disabled:opacity-50 cursor-pointer w-full sm:w-auto"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-6 py-2.5 text-sm font-bold text-white hover:opacity-90 shadow-md active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-6 py-3 text-sm font-bold text-white hover:opacity-90 shadow-md active:scale-95 transition-all disabled:opacity-50 cursor-pointer w-full sm:w-auto"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingItem ? "Update Changes" : "Save Feature"}
@@ -282,12 +289,17 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
 
       {/* Delete Confirmation Modal */}
       <Modal open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Confirm Deletion" description="Are you sure you want to delete this feature? This action cannot be undone.">
-        <div className="flex justify-end gap-3 mt-6">
-          <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-sm font-bold text-slate-500 cursor-pointer">Cancel</button>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
+          <button 
+            onClick={() => setIsDeleteModalOpen(false)} 
+            className="px-5 py-3 text-sm font-bold text-slate-500 cursor-pointer w-full sm:w-auto rounded-xl hover:bg-slate-50"
+          >
+            Cancel
+          </button>
           <button 
             onClick={confirmDelete} 
             disabled={isSubmitting}
-            className="rounded-xl bg-red-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+            className="rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50 cursor-pointer w-full sm:w-auto"
           >
             {isSubmitting ? "Deleting..." : "Confirm Delete"}
           </button>
