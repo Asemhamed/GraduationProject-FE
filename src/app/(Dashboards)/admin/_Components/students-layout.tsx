@@ -173,8 +173,8 @@ export default function StudentsLayout({ initialStudents }: { initialStudents: S
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredData.map((student) => (
-                <tr key={student.student_id} className="group hover:bg-blue-50/30 transition-colors">
-                  <td className="px-6 md:px-8 py-5 text-sm font-mono text-blue-600 font-semibold">#{student.student_id}</td>
+                <tr key={student.student_id} className="group hover:bg-indigo-50/30 transition-colors">
+                  <td className="px-6 md:px-8 py-5 text-sm font-mono text-indigo-600 font-semibold">#{student.student_id.toString().padStart(3, '0')}</td>
                   <td className="px-6 md:px-8 py-5">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 shrink-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
@@ -242,7 +242,7 @@ export default function StudentsLayout({ initialStudents }: { initialStudents: S
               <input
                 {...register("full_name", { required: "Required" })}
                 autoComplete="off"
-                className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all shadow-sm focus:ring-4 focus:ring-blue-500/5"
+                className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-indigo-500 transition-all shadow-sm focus:ring-4 focus:ring-indigo-500/5"
                 placeholder="Student Name"
               />
             </div>
@@ -261,7 +261,7 @@ export default function StudentsLayout({ initialStudents }: { initialStudents: S
                     {...register("email", { required: "Email is required" })}
                     type="email"
                     autoComplete="new-email"
-                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all shadow-sm focus:ring-4 focus:ring-blue-500/5"
+                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-indigo-500 transition-all shadow-sm focus:ring-4 focus:ring-indigo-500/5"
                     placeholder="student@example.com"
                   />
                 </div>
@@ -277,7 +277,7 @@ export default function StudentsLayout({ initialStudents }: { initialStudents: S
                     {...register("password", { required: "Password is required" })}
                     type="password"
                     autoComplete="new-password"
-                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all shadow-sm focus:ring-4 focus:ring-blue-500/5"
+                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-indigo-500 transition-all shadow-sm focus:ring-4 focus:ring-indigo-500/5"
                     placeholder="••••••••"
                   />
                 </div>
@@ -294,7 +294,7 @@ export default function StudentsLayout({ initialStudents }: { initialStudents: S
               <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <select
                 {...register("semester", { required: "Required" })}
-                className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all appearance-none bg-white shadow-sm focus:ring-4 focus:ring-blue-500/5"
+                className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:border-indigo-500 transition-all appearance-none bg-white shadow-sm focus:ring-4 focus:ring-indigo-500/5"
               >
                 <option value="Fall">Fall</option>
                 <option value="Spring">Spring</option>
@@ -315,7 +315,7 @@ export default function StudentsLayout({ initialStudents }: { initialStudents: S
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50 transition-all cursor-pointer shadow-lg shadow-blue-100 order-1 md:order-2"
+              className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition-all cursor-pointer shadow-lg shadow-indigo-100 order-1 md:order-2"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingItem ? "Save Changes" : "Create Student"}

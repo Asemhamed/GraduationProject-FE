@@ -166,7 +166,7 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
             filteredData.map((item) => (
               <div key={item.feature_id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div className="flex flex-col gap-1">
-                   <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full w-fit">
+                   <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full w-fit">
                     <Hash className="h-2.5 w-2.5" />
                     {item.feature_id.toString().padStart(3, '0')}
                    </div>
@@ -198,8 +198,8 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.feature_id} className="group hover:bg-blue-50/30 transition-colors">
-                    <td className="px-8 py-5 text-sm font-mono text-blue-600 font-semibold">
+                  <tr key={item.feature_id} className="group hover:bg-indigo-50/30 transition-colors">
+                    <td className="px-8 py-5 text-sm font-mono text-indigo-600 font-semibold">
                       #{item.feature_id.toString().padStart(3, '0')}
                     </td>
                     <td className="px-8 py-5 text-sm font-bold text-slate-700">
@@ -259,7 +259,7 @@ export default function FeaturesLayout({ features }: { features: Feature[] }) {
               type="text"
               placeholder="e.g. Wireless Casting"
               className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all ${
-                errors.feature_name ? "border-red-500 focus:ring-red-500/10" : "border-slate-200 focus:ring-blue-500/10 focus:border-blue-500"
+                errors.feature_name ? "border-red-500 focus:ring-red-500/10" : "border-slate-200 focus:ring-indigo-500/10 focus:border-indigo-500"
               }`}
             />
             {errors.feature_name && (
