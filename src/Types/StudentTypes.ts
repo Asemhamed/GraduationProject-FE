@@ -33,7 +33,7 @@ export interface StudentFormData {
     password: string
 }
 
-interface StudentRecord {
+export interface StudentRecord {
     full_name: string;
     semester: Semester;
     student_id: number;

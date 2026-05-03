@@ -9,6 +9,7 @@ const pageTitles: Record<string, string> = {
   "/admin/features": "Features",
   "/admin/rooms": "Rooms",
   "/admin/courses": "Courses",
+  "/admin/timetable": "Timetable",
   "/admin/admins": "Admins",
   "/admin/instructors": "Instructors",
   "/admin/students": "Students",
@@ -19,8 +20,8 @@ export function AdminHeader() {
   const title = pageTitles[pathname] || "Dashboard"
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur-sm md:px-6">
-      <div className="flex items-center gap-4 pl-14 md:pl-0">
+    <header className="sticky top-0 z-30 flex h-16 items-center  justify-between border-b border-border bg-card/95 px-4 backdrop-blur-sm md:px-6">
+      <div className="flex items-center gap-4 pl-14 md:pl-0 ">
         <h1 className="text-xl font-bold text-foreground">{title}</h1>
       </div>
 

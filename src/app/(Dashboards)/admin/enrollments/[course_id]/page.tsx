@@ -1,0 +1,31 @@
+import { GetCourses } from "@/ServerActions/Course/GetCourses"
+import { GetCourseEnrollments } from "@/ServerActions/Enrollment/GetCourseEnrollments"
+import { Course } from "@/Types/CourseTypes"
+import { notFound } from "next/navigation"
+import EnrollmentLayout from "../../_Components/enrollment-layout"
+
+interface EnrollmentPageProps {
+    params: { course_id: string }
+}
+
+export default async function EnrollmentPage({ params }: EnrollmentPageProps) {
+    const {course_id} = await params;
+    const courseId = Number(course_id);
+
+    if (isNaN(courseId)) notFound()
+
+    const [courses, enrollments] = await Promise.all([
+        GetCourses(0, 1000),
+        GetCourseEnrollments(courseId)
+    ])
+
+    const course = courses.find((c:Course) => c.course_id === courseId)
+    if (!course) notFound()
+
+    return (
+        <EnrollmentLayout
+            course={course}
+            initialEnrollments={enrollments}
+        />
+    )
+}

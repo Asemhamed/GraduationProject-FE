@@ -5,6 +5,7 @@ import { useLogout } from "@/Hooks/useLogout"
 import { AdminResponse } from "@/Types/AdminTypes"
 import {
   BookOpen,
+  CalendarClock,
   ChevronLeft,
   ChevronRight,
   DoorOpen,
@@ -13,6 +14,7 @@ import {
   LogOut,
   Menu,
   Sparkles,
+  UserPlus,
   Users,
   UserStar,
   X
@@ -26,6 +28,7 @@ const navItems = [
   { href: "/admin/features", label: "Features", icon: Sparkles },
   { href: "/admin/rooms", label: "Rooms", icon: DoorOpen },
   { href: "/admin/courses", label: "Courses", icon: BookOpen },
+  { href: "/admin/timetable", label: "Timetable", icon: CalendarClock },
   { href: "/admin/admins", label: "Admins", icon: UserStar},
   { href: "/admin/instructors", label: "Instructors", icon: Users },
   { href: "/admin/students", label: "Students", icon: GraduationCap },
@@ -41,7 +44,7 @@ export function AdminSidebar({ profile }: { profile: AdminResponse }) {
       {/* Mobile menu button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg md:hidden"
+        className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-violet-500 text-primary-foreground shadow-lg md:hidden"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
@@ -65,7 +68,7 @@ export function AdminSidebar({ profile }: { profile: AdminResponse }) {
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           {!collapsed && (
             <Link href="/admin" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-md">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 shadow-md">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <div className="flex flex-col">
