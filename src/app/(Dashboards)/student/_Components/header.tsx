@@ -1,7 +1,8 @@
 
 "use client"
 
-import { Bell } from "lucide-react"
+import { User } from "lucide-react"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const pageTitles: Record<string, string> = {
@@ -24,18 +25,10 @@ export function Header() {
 
       <div className="flex items-center gap-3">
 
-        {/* Notifications */}
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white shadow-sm">
-            3
-          </span>
-        </button>
-
         {/* Profile */}
-        <div className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 font-semibold text-white shadow-sm md:flex">
-          A
-        </div>
+        <Link href={'/student/profile'} className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm md:flex">
+          <User className="h-4 w-4" />
+        </Link>
       </div>
     </header>
   )

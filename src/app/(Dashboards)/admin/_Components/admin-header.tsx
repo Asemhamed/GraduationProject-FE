@@ -1,8 +1,8 @@
 "use client"
 
-import { usePathname } from "next/navigation"
-import { Bell, Search } from "lucide-react"
+import { User } from "lucide-react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 const pageTitles: Record<string, string> = {
   "/admin": "Dashboard",
@@ -31,7 +31,7 @@ export function AdminHeader() {
 
         {/* Profile */}
         <Link href="/admin/profile" className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm md:flex">
-          A
+          <User className="h-4 w-4" />  
         </Link>
       </div>
     </header>

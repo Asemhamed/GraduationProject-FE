@@ -18,6 +18,8 @@ export default async function AdminLayout({
   if (!profile) {
     redirect("/login");
   }
+    profile.full_name = profile.full_name.toUpperCase();
+
 
   return (
     <div className="flex min-h-screen bg-background">

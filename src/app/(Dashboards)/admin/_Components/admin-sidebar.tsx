@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   Sparkles,
+  User,
   UserPlus,
   Users,
   UserStar,
@@ -125,11 +126,11 @@ export function AdminSidebar({ profile }: { profile: AdminResponse }) {
         <div className="border-t border-border p-3">
           <div className={`flex items-center gap-3 rounded-xl bg-muted/50 p-3 ${collapsed ? "justify-center" : ""}`}>
             <Link href={'/admin/profile'} className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm">
-              A
+              <User className="h-4 w-4" />
             </Link>
             {!collapsed && (
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-sm font-medium text-foreground">{profile.full_name}</p>
+                <p className="truncate text-sm font-medium text-foreground">{profile.full_name.toUpperCase()}</p>
                 <p className="truncate text-xs text-muted-foreground">{profile.title}</p>
               </div>
             )}

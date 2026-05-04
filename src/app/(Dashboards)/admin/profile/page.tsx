@@ -1,7 +1,7 @@
 import { GetProfile } from "@/ServerActions/Profile/GetProfile";
 import { redirect } from "next/navigation";
-import ProfileLayout from "../_Components/profile-layout";
 import { toast } from "react-toastify";
+import AdminProfile from "../_Components/profile-layout";
 
 export default async function ProfilePage() {
   const profile = await GetProfile();
@@ -11,5 +11,5 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  return <ProfileLayout profile={profile} />;
+  return <AdminProfile profile={profile} />;
 }
