@@ -39,5 +39,10 @@ export interface StudentRecord {
     student_id: number;
     user_id: number;
 }
+export interface InstructorRecord {
+    name: string;
+    instructor_id: number;
+    user_id: number;
+}
 
 export type StudentResponse = StudentRecord[];

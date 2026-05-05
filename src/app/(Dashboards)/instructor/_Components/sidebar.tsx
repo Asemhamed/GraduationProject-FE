@@ -1,10 +1,9 @@
 "use client"
 
 import { useLogout } from "@/Hooks/useLogout"
-import { StudentRecord } from "@/Types/StudentTypes"
+import { InstructorRecord } from "@/Types/StudentTypes"
 import {
   Calendar,
-  CheckSquare,
   ChevronLeft,
   ChevronRight,
   GraduationCap,
@@ -21,13 +20,12 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 
 const navItems = [
-  { href: "/student", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/student/timetable", label: "Timetable", icon: Calendar },
-  { href: "/student/enrollment", label: "Enrollment", icon: CheckSquare },
+  { href: "/instructor", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/instructor/timetable", label: "Timetable", icon: Calendar },
 ]
 
 
-export function Sidebar({ profile }: { profile: StudentRecord }) {
+export function InstructorSidebar({ profile }: { profile: InstructorRecord }) {
   
    const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
@@ -62,12 +60,12 @@ export function Sidebar({ profile }: { profile: StudentRecord }) {
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           {!collapsed && (
-            <Link href="/student" className="flex items-center gap-3">
+            <Link href="/instructor" className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 shadow-md">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-bold text-foreground">Student Portal</span>
+                <span className="text-lg font-bold text-foreground">Instructor Portal</span>
               </div>
             </Link>
           )}
@@ -118,12 +116,12 @@ export function Sidebar({ profile }: { profile: StudentRecord }) {
         {/* Footer */}
         <div className="border-t border-border p-3">
           <div className={`flex items-center gap-3 rounded-xl bg-muted/50 p-3 ${collapsed ? "justify-center" : ""}`}>
-            <Link href={'/student/profile'} className="flex cursor-pointer h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm">
+            <Link href={'/instructor/profile'} className="flex cursor-pointer h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm">
               <User className="h-4 w-4" />
             </Link>
             {!collapsed && (
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-sm font-medium text-foreground">{profile.full_name.toUpperCase()}</p>
+                <p className="truncate text-sm font-medium text-foreground">{profile.name.toUpperCase()}</p>
                 <p className="truncate text-xs text-muted-foreground">ID-{profile.user_id}</p>
               </div>
             )}

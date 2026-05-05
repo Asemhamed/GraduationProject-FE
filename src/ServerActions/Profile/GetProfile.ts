@@ -1,6 +1,4 @@
 import { getToken } from "@/Cookies/auth.actions";
-import { AdminResponse } from "@/Types/AdminTypes";
-import { StudentRecord } from "@/Types/StudentTypes";
 
 export async function GetProfile(): Promise<any> {
   const token = await getToken();

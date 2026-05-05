@@ -94,7 +94,7 @@ export default function EnrollmentLayout({ course, initialEnrollments }: Enrollm
 
             {/* Back button */}
             <button
-                onClick={() => router.back()}
+                onClick={() => {router.back(); router.refresh()}}
                 className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors group"
             >
                 <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />

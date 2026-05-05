@@ -24,7 +24,7 @@ interface TimetableLayoutProps {
     initialTimetable: TimetableResponse
 }
 
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sun (W2)"]
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 const HOURS = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"]
 
 export default function TimetableLayout({ initialTimetable }: TimetableLayoutProps) {
@@ -39,7 +39,6 @@ export default function TimetableLayout({ initialTimetable }: TimetableLayoutPro
         try {
             const fresh = await GetTimetable()
             setTimetable(fresh)
-            toast.success("Schedule updated")
         } catch {
             toast.error("Failed to refresh schedule")
         } finally {
@@ -74,7 +73,7 @@ export default function TimetableLayout({ initialTimetable }: TimetableLayoutPro
     }
 
     return (
-        <div className="w-full max-w-[1600px] mx-auto p-3 md:p-6 space-y-4 md:space-y-6 animate-in fade-in duration-500 overflow-x-hidden">
+        <div className="w-full  max-w-full lg:max-w-[1600px] mx-auto p-3 md:p-6 space-y-4 md:space-y-6 animate-in fade-in duration-500 overflow-x-hidden border-none">
             
             {/* --- HEADER --- */}
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-100 pb-6">
@@ -90,7 +89,7 @@ export default function TimetableLayout({ initialTimetable }: TimetableLayoutPro
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <input 
                             type="text" 
-                            placeholder="Filter course or room..."
+                            placeholder="Filter course..."
                             className="w-full lg:w-64 pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-sm"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -120,7 +119,7 @@ export default function TimetableLayout({ initialTimetable }: TimetableLayoutPro
             </div>
 
             {/* --- MOBILE DAY TABS --- */}
-            <div className="flex lg:hidden overflow-x-auto pb-1 gap-2 no-scrollbar">
+            <div className="flex lg:hidden overflow-x-auto pb-1 gap-2 no-scrollbar max-w-full">
                 {DAYS.map((day, idx) => (
                     <button
                         key={day}
@@ -140,8 +139,8 @@ export default function TimetableLayout({ initialTimetable }: TimetableLayoutPro
             <div className="w-full rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 
                 {/* DESKTOP VIEW */}
-                <div className="hidden lg:block w-full">
-                    <table className="w-full border-collapse table-fixed">
+                <div className="hidden lg:block w-full overflow-x-auto">
+                    <table className="w-full border-collapse table-fixed min-w-[1000px]">
                         <thead>
                             <tr className="bg-slate-50/80">
                                 <th className="p-2 border-b border-r border-slate-100 text-[9px] font-bold uppercase tracking-tighter text-slate-400 w-24">
@@ -205,10 +204,10 @@ export default function TimetableLayout({ initialTimetable }: TimetableLayoutPro
                 </div>
 
                 {/* MOBILE VIEW */}
-                <div className="lg:hidden w-full">
-                    <div className="bg-indigo-50/50 p-3 border-b border-indigo-100 flex justify-between items-center">
-                        <h2 className="text-xs font-black text-indigo-700 uppercase tracking-wider flex items-center gap-2">
-                            <Calendar className="h-3 w-3" /> {DAYS[activeDayMobile]}
+                <div className="lg:hidden w-full overflow-hidden">
+                    <div className="bg-indigo-50/50 p-3 border-b border-indigo-100 flex justify-between items-center overflow-hidden">
+                        <h2 className="text-xs font-black text-indigo-700 uppercase tracking-wider flex items-center gap-2 truncate">
+                            <Calendar className="h-3 w-3 shrink-0" /> {DAYS[activeDayMobile]}
                         </h2>
                         <span className="text-[9px] font-bold text-indigo-400 bg-white px-1.5 py-0.5 rounded border border-indigo-100">
                             CYCLE {activeDayMobile + 1}

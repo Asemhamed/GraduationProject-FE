@@ -6,13 +6,13 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const pageTitles: Record<string, string> = {
-  "/student": "Dashboard",
-  "/student/timetable": "Timetable",
-  "/student/enrollment": "Enrollment",
+  "/instructor": "Dashboard",
+  "/instructor/timetable": "Timetable",
+  "/instructor/enrollment": "Enrollment",
 }
 
 
-export function Header() {
+export function InstructorHeader() {
   const pathname = usePathname()
   const title = pageTitles[pathname] || "Dashboard"
 
@@ -25,7 +25,7 @@ export function Header() {
       <div className="flex items-center gap-3">
 
         {/* Profile */}
-        <Link href={'/student/profile'} className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm md:flex">
+        <Link href={'/instructor/profile'} className="hidden h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 font-semibold text-white shadow-sm md:flex">
           <User className="h-4 w-4" />
         </Link>
       </div>

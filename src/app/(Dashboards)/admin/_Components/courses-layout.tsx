@@ -152,6 +152,7 @@ export default function CoursesLayout({
     }
 
     const confirmDelete = async () => {
+        
         if (!itemToDelete) return
         setIsSubmitting(true)
         try {

@@ -15,7 +15,7 @@ export default async function CoursesPage() {
     GetCourses(0, 100),
     GetInstructors(0, 100),
     GetFeatures(0, 100),
-    GetStudents(0, 100) 
+    GetStudents(0, 1000) 
   ]);
 
   const formattedInstructors = instructorsData.map(inst => ({

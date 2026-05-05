@@ -1,78 +1,181 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookOpen, Calendar, GraduationCap, Clock } from "lucide-react"
+"use client"
 
-const stats = [
-  { title: "Enrolled Courses", value: "6", icon: BookOpen, color: "text-blue-600" },
-  { title: "Total Credits", value: "20", icon: GraduationCap, color: "text-green-600" },
-  { title: "Upcoming Classes", value: "3", icon: Calendar, color: "text-purple-600" },
-  { title: "Study Hours", value: "24h", icon: Clock, color: "text-orange-600" },
-]
+import { useEffect, useState, useCallback } from "react"
+import { GetCourses } from "@/ServerActions/Course/GetCourses"
+import { GetProfile } from "@/ServerActions/Profile/GetProfile"
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card"
+import {
+  BookOpen,
+  Calendar,
+  GraduationCap,
+  Clock,
+  ArrowUpRight,
+  Bell,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react"
+import Link from "next/link"
+import { StudentRecord } from "@/Types/StudentTypes"
+import { Course } from "@/Types/CourseTypes"
 
-export default function DashboardPage() {
+const POLL_INTERVAL = 60_000 // 1 minute polling
+
+export default function StudentDashboard() {
+  const [student, setStudent] = useState<StudentRecord | null>(null)
+  const [courses, setCourses] = useState<Course[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [profileData, allCourses] = await Promise.all([
+        GetProfile(),
+        GetCourses(0, 1000)
+      ])
+
+      if (profileData) {
+        setStudent(profileData)
+        const enrolled = allCourses.filter((c: Course) => 
+          c.students.some(s => s.student_id === profileData.student_id)
+        )
+        setCourses(enrolled)
+      }
+    } catch (err) {
+      console.error("Dashboard sync error:", err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+    const interval = setInterval(fetchData, POLL_INTERVAL)
+    return () => clearInterval(interval)
+  }, [fetchData])
+
+  const statCards = [
+    {
+      title: "Enrolled Courses",
+      value: courses.length,
+      icon: BookOpen,
+      color: "text-blue-600",
+      gradient: "from-blue-500 to-indigo-500",
+      href: "/student/enrollment"
+    },
+    {
+      title: "Current Semester",
+      value: student?.semester || "N/A",
+      icon: GraduationCap,
+      color: "text-emerald-600",
+      gradient: "from-emerald-500 to-teal-500",
+      href: "#"
+    },
+    {
+      title: "Your Timetable",
+      value: '',
+      icon: Calendar,
+      color: "text-purple-600",
+      gradient: "from-purple-500 to-pink-500",
+      href: "/student/timetable"
+    },
+    {
+      title: "Instructor Count",
+      value: new Set(courses.flatMap(c => c.instructors.map(i => i.instructor_id))).size,
+      icon: Clock,
+      color: "text-orange-600",
+      gradient: "from-orange-500 to-amber-500",
+      href: "#"
+    }
+  ]
+
   return (
-    <div className="space-y-6 md:space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground md:text-4xl">Welcome back, Student!</h1>
-        <p className="mt-1 text-sm text-muted-foreground md:mt-2 md:text-base">
-          Here&apos;s an overview of your academic progress.
-        </p>
+    <div className="space-y-8 animate-in fade-in duration-700">
+      {/* Dynamic Welcome Header */}
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">
+            Welcome back, <span className="text-primary">{student?.full_name?.split(' ')[0] || 'Student'}!</span>
+          </h1>
+          <p className="text-muted-foreground">
+            You are currently tracking <span className="font-bold text-foreground">{courses.length}</span> active courses for the {student?.semester} semester.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary border border-primary/20">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          </span>
+          System Sync Active
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between p-3 pb-1 md:p-6 md:pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground md:text-sm">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className={`h-4 w-4 md:h-5 md:w-5 ${stat.color}`} />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-              <p className="text-2xl font-bold text-foreground md:text-3xl">{stat.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Deadlines</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {[
-              { course: "CS 401", task: "AI Project Submission", date: "Apr 28, 2024" },
-              { course: "IT 350", task: "Cloud Security Report", date: "Apr 30, 2024" },
-              { course: "IS 210", task: "Database Design Quiz", date: "May 2, 2024" },
-            ].map((deadline, i) => (
-              <div key={i} className="flex items-center justify-between rounded-lg border p-4">
-                <div>
-                  <p className="font-medium text-foreground">{deadline.task}</p>
-                  <p className="text-sm text-muted-foreground">{deadline.course}</p>
+      {/* Modern Stats Grid */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-32 rounded-2xl bg-muted animate-pulse border border-border" />
+          ))
+        ) : (
+          statCards.map((stat) => (
+            <Link
+              key={stat.title}
+              href={stat.href}
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-primary/50 hover:shadow-xl"
+            >
+              <div className="flex flex-col gap-4">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${stat.gradient} shadow-lg transition-transform group-hover:scale-110`}>
+                  <stat.icon className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-sm text-muted-foreground">{deadline.date}</span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{stat.title}</p>
+                  <p className="text-2xl font-black text-foreground">{stat.value}</p>
+                </div>
               </div>
-            ))}
+              <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 text-muted-foreground/30 transition-all group-hover:text-primary group-hover:opacity-100" />
+            </Link>
+          ))
+        )}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-1">
+        {/* Your Active Schedule / Courses */}
+        <Card className="rounded-2xl border-border shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              Active Enrollments
+            </CardTitle>
+            <Link href="/student/enrollment" className="text-xs font-bold text-primary hover:underline">View Catalog</Link>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {courses.length > 0 ? (
+              courses.map((course) => (
+                <div key={course.course_id} className="flex items-center justify-between rounded-xl border border-border p-4 transition-colors hover:bg-muted/50">
+                  <div>
+                    <p className="font-bold text-foreground">{course.course_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {course.instructors.map(i => i.name).join(", ")}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    {course.features.slice(0, 2).map(f => (
+                      <span key={f.feature_id} className="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold uppercase">
+                        {f.feature_name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center py-8 text-muted-foreground text-sm">No courses enrolled yet.</p>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Announcements</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {[
-              { title: "Final Exam Schedule Released", time: "2 hours ago" },
-              { title: "Library Extended Hours", time: "1 day ago" },
-              { title: "Summer Registration Opens", time: "3 days ago" },
-            ].map((announcement, i) => (
-              <div key={i} className="flex items-center justify-between rounded-lg border p-4">
-                <p className="font-medium text-foreground">{announcement.title}</p>
-                <span className="text-sm text-muted-foreground">{announcement.time}</span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
       </div>
     </div>
   )
