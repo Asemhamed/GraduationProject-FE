@@ -15,9 +15,6 @@ export async function GetCourseEnrollments(course_Id:number): Promise<StudentRes
       },
     })
 
-    if (!response.ok) {
-      throw new Error(`API responded with status ${response.status}`)
-    }
 
     const data = await response.json();
     console.log( );

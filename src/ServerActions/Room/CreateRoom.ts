@@ -2,6 +2,7 @@
 
 import { getToken } from "@/Cookies/auth.actions";
 import { Room } from "@/Types/RoomsType";
+import { revalidatePath } from "next/cache";
 
 
 export async function CreateRoom({capacity, feature_ids}: { capacity: number, feature_ids: number[] }): Promise<Room > {
@@ -23,6 +24,9 @@ export async function CreateRoom({capacity, feature_ids}: { capacity: number, fe
     }
 
     const data = await response.json()
+        revalidatePath("/admin");
+        revalidatePath("/instructor");
+        revalidatePath("/student");
     
     return data
   } catch (error) {

@@ -15,9 +15,6 @@ export async function GetTimetable(): Promise<TimetableResponse> {
       },
     })
 
-    if (!response.ok) {
-      throw new Error(`API responded with status ${response.status}`)
-    }
 
     const data = await response.json()
     

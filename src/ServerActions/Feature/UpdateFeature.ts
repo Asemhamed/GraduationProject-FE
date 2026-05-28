@@ -1,6 +1,7 @@
 'use server'
 
 import { getToken } from "@/Cookies/auth.actions";
+import { revalidatePath } from "next/cache";
 
 export async function UpdateFeature(feature_id: number, feature_name: string): Promise<any> {
     const token = await getToken();
@@ -19,6 +20,9 @@ export async function UpdateFeature(feature_id: number, feature_name: string): P
         throw new Error("Failed to update feature")
     }
     const data = await response.json();
+        revalidatePath("/admin");
+        revalidatePath("/instructor");
+        revalidatePath("/student");
     return data;
     
   } catch (error) {

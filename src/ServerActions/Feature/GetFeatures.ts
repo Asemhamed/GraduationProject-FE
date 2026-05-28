@@ -14,9 +14,6 @@ export async function GetFeatures(skip: number = 0, limit: number = 100): Promis
       },
     })
 
-    if (!response.ok) {
-      throw new Error(`API responded with status ${response.status}`)
-    }
 
     const data = await response.json()
     

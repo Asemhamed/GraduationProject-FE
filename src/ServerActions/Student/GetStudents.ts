@@ -15,9 +15,6 @@ export async function GetStudents(skip: number = 0, limit: number = 100): Promis
       },
     })
 
-    if (!response.ok) {
-      throw new Error(`API responded with status ${response.status}`)
-    }
 
     return await response.json();
   } catch (error) {

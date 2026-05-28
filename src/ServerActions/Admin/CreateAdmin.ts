@@ -22,7 +22,7 @@ export async function CreateAdmin(admin: CreateAdminData): Promise<CreateAdminRe
         throw new Error(`API responded with status ${response.status}`)
     }
 
-    const data = await response.json()
+    const data = await response.json();
     
     return data
     } catch (error) {

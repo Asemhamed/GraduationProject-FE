@@ -2,6 +2,7 @@
 
 import { getToken } from "@/Cookies/auth.actions";
 import { Course, CreateCourseData } from "@/Types/CourseTypes";
+import { revalidatePath } from "next/cache";
 
 
 export async function CreateCourse(course: CreateCourseData): Promise<Course> {
@@ -23,7 +24,9 @@ export async function CreateCourse(course: CreateCourseData): Promise<Course> {
     }
 
     const data = await response.json()
-    
+    revalidatePath("/admin");
+    revalidatePath("/instructor");
+    revalidatePath("/student");
     return data
     } catch (error) {
     console.error(" Error creating course:", error)

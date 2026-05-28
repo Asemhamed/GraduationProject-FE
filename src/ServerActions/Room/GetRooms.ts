@@ -14,9 +14,6 @@ export async function GetRooms(skip: number = 0, limit: number = 100): Promise<R
       },
     });
 
-  if (!response.ok) {
-      throw new Error(`API responded with status ${response.status}`)
-    }
 
     const data = await response.json()
     return data

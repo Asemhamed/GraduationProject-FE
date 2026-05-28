@@ -2,6 +2,7 @@
 
 import { getToken } from "@/Cookies/auth.actions";
 import { CreateFeatureResponse } from "@/Types/FeaturesType";
+import { revalidatePath } from "next/cache";
 
 
 export async function CreateFeature(feature_name:string): Promise<CreateFeatureResponse | { error: string } | Response> {
@@ -23,7 +24,9 @@ export async function CreateFeature(feature_name:string): Promise<CreateFeatureR
     }
 
     const data = await response.json()
-    
+    revalidatePath("/admin");
+    revalidatePath("/instructor");
+    revalidatePath("/student");
     return data
   } catch (error) {
     console.error(" Error creating feature:", error)

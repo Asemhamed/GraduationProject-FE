@@ -2,6 +2,7 @@
 
 import { getToken } from "@/Cookies/auth.actions";
 import { CreateStudentData, CreateStudentResponse } from "@/Types/StudentTypes";
+import { revalidatePath } from "next/cache";
 
 
 export async function CreateStudent(student: CreateStudentData): Promise<CreateStudentResponse> {
@@ -23,6 +24,9 @@ export async function CreateStudent(student: CreateStudentData): Promise<CreateS
     }
 
     const data = await response.json()
+        revalidatePath("/admin");
+        revalidatePath("/instructor");
+        revalidatePath("/student");
     
     return data
     } catch (error) {

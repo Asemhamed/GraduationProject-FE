@@ -15,6 +15,7 @@ export async function DeleteAdmin(adminId: number): Promise<boolean> {
     if (!response.ok) {
         throw new Error("Failed to delete admin");
     }
+
     return true ;
   } catch (error) {
     console.error("Error deleting admin:", error)

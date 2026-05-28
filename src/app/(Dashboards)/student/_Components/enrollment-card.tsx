@@ -77,7 +77,7 @@ export default function EnrollmentCard({ course, currentStudentId }: Props) {
           className={`mt-auto flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-50 ${
             isEnrolled
               ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50'
-              : 'bg-slate-900 text-white hover:bg-slate-800'
+              : 'bg-indigo-700 text-white hover:bg-indigo-600'
           }`}
         >
           {isPending ? (

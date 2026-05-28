@@ -2,6 +2,7 @@
 
 import { getToken } from "@/Cookies/auth.actions";
 import { InstructorResponse } from "@/Types/InstructorTypes";
+import { revalidatePath } from "next/cache";
 
 export async function UpdateInstructor(instructor_id: number, name: string): Promise<InstructorResponse> {
     const token = await getToken();
@@ -20,6 +21,10 @@ export async function UpdateInstructor(instructor_id: number, name: string): Pro
         throw new Error("Failed to update instructor")
     }
     const data = await response.json();
+        revalidatePath("/admin");
+        revalidatePath("/instructor");
+        revalidatePath("/student");
+    
     return data;
     
   } catch (error) {

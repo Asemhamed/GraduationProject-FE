@@ -1,6 +1,7 @@
 'use server'
 
 import { getToken } from "@/Cookies/auth.actions";
+import { revalidatePath } from "next/cache";
 
 export async function UpdateRoom(room_id: number, capacity: number, feature_ids: number[]): Promise<any> {
     const token = await getToken();
@@ -19,6 +20,10 @@ export async function UpdateRoom(room_id: number, capacity: number, feature_ids:
         throw new Error("Failed to update room")
     }
     const data = await response.json();
+        revalidatePath("/admin");
+        revalidatePath("/instructor");
+        revalidatePath("/student");
+    
     return data;
     
   } catch (error) {

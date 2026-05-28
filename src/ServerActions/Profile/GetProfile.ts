@@ -14,7 +14,6 @@ export async function GetProfile(): Promise<any> {
       cache: "no-store" 
     });
 
-    if (!response.ok) return null;
     return await response.json();
   } catch (error) {
     return null;
