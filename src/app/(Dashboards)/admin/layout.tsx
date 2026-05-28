@@ -1,7 +1,8 @@
 import { GetProfile } from "@/ServerActions/Profile/GetProfile";
-import { AdminHeader } from "./_Components/admin-header"
-import { AdminSidebar } from "./_Components/admin-sidebar"
 import { redirect } from "next/navigation";
+import { AdminHeader } from "./_Components/admin-header";
+import { AdminSidebar } from "./_Components/admin-sidebar";
+
 
 export default async function AdminLayout({
   children,

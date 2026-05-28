@@ -1,6 +1,5 @@
 "use client"
 
-import { useUserData } from "@/Context/UserData"
 import { useLogout } from "@/Hooks/useLogout"
 import { AdminResponse } from "@/Types/AdminTypes"
 import {
@@ -15,14 +14,15 @@ import {
   Menu,
   Sparkles,
   User,
-  UserPlus,
   Users,
   UserStar,
   X
 } from "lucide-react"
+import logo from "@/assets/download.png"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import Image from "next/image"
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -69,9 +69,7 @@ export function AdminSidebar({ profile }: { profile: AdminResponse }) {
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           {!collapsed && (
             <Link href="/admin" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 shadow-md">
-                <GraduationCap className="h-6 w-6 text-white" />
-              </div>
+              <Image src={logo} alt="EduAdmin Logo" className="h-12 w-12" />
               <div className="flex flex-col">
                 <span className="text-lg font-bold text-foreground">EduAdmin</span>
                 <span className="text-[10px] text-muted-foreground">Management Portal</span>
@@ -79,8 +77,8 @@ export function AdminSidebar({ profile }: { profile: AdminResponse }) {
             </Link>
           )}
           {collapsed && (
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-md">
-              <GraduationCap className="h-6 w-6 text-white" />
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl  shadow-md">
+              <Image src={logo} alt="EduAdmin Logo" className="h-12 w-12" />
             </div>
           )}
           <button

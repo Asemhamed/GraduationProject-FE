@@ -16,8 +16,10 @@ import {
   X
 } from "lucide-react"
 import Link from "next/link"
+import logo from "@/assets/download.png"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import Image from "next/image"
 
 const navItems = [
   { href: "/instructor", label: "Dashboard", icon: LayoutDashboard },
@@ -61,17 +63,15 @@ export function InstructorSidebar({ profile }: { profile: InstructorRecord }) {
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           {!collapsed && (
             <Link href="/instructor" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 shadow-md">
-                <GraduationCap className="h-6 w-6 text-white" />
-              </div>
+              <Image src={logo} alt="EduAdmin Logo" className="h-12 w-12" />
               <div className="flex flex-col">
                 <span className="text-lg font-bold text-foreground">Instructor Portal</span>
               </div>
             </Link>
           )}
           {collapsed && (
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-md">
-              <GraduationCap className="h-6 w-6 text-white" />
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl  shadow-md">
+              <Image src={logo} alt="EduAdmin Logo" className="h-12 w-12" />
             </div>
           )}
           <button
