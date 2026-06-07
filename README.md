@@ -20,11 +20,8 @@ A full-featured **Education Management System** built with Next.js, offering thr
 - [Features](#-features)
 - [Dashboards](#-dashboards)
 - [Pages](#-pages)
-- [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
-- [Contributing](#-contributing)
-- [License](#-license)
 
 ---
 
@@ -118,8 +115,8 @@ Students can access their timetable, view course details, and stay up to date wi
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/edu-system.git
-cd edu-system
+git https://github.com/Asemhamed/GraduationProject-FE
+cd GraduationProject-FE
 
 # 2. Install dependencies
 npm install
@@ -128,34 +125,12 @@ npm install
 cp .env.example .env.local
 ```
 
-### Environment Variables
 
-Fill in your `.env.local` file:
-
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/edusystem"
-
-# NextAuth
-NEXTAUTH_SECRET="your-secret-key"
-NEXTAUTH_URL="http://localhost:3000"
 
 # App
 NEXT_PUBLIC_APP_NAME="EduSystem"
 ```
 
-### Run the App
-
-```bash
-# Run database migrations
-npx prisma migrate dev
-
-# Seed the database (optional)
-npx prisma db seed
-
-# Start development server
-npm run dev
-```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
