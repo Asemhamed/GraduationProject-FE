@@ -1,51 +1,41 @@
-export type TimetableEntry = {
-    message: string;
-    job_id: string;
-    status: string;
-}
-
-
-
-export interface Feature {
-  feature_id: number;
-  feature_name: string;
-}
-
 export interface Instructor {
-  instructor_id: number;
-  user_id: number;
-  name: string;
+    id: number
+    name: string
 }
 
 export interface Student {
-  student_id: number;
-  user_id: number;
-  full_name: string;
-  semester: "Fall" | "Spring" | "Summer";
+    id: number
+    name: string
+}
+
+export interface PrecedenceRule {
+    before_course_id: number
+    after_course_id: number
 }
 
 export interface Course {
-  course_id: number;
-  course_name: string;
-  instructors: Instructor[];
-  students: Student[];
-  features: Feature[]; 
+    course_id: number
+    course_name: string
+    instructors: Instructor[]
+    students: Student[]
+    features: string[]
+    is_enrollment_open: boolean
+    // Index = timeslot_id: 1 = high priority, -1 = low priority, 0 = neutral/unavailable
+    course_availability: number[]
+    precedence_rules: PrecedenceRule[]
 }
 
 export interface Room {
-  room_id: number;
-  capacity: number;
-  features: Feature[];
+    room_id: number
+    capacity: number
+    features: string[]
 }
 
-export interface TimeSlotResponse {
-  id: number;
-  timeslot_id: number;
-  course: Course;
-  room: Room;
+export interface TimetableEntry {
+    id: number
+    timeslot_id: number
+    course: Course
+    room: Room
 }
 
-export type TimetableResponse = TimeSlotResponse[];
-
-
-
+export type TimetableResponse = TimetableEntry[]

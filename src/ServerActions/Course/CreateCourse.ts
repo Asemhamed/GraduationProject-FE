@@ -1,35 +1,35 @@
 'use server'
-
 import { getToken } from "@/cookies/auth.actions";
 import { Course, CreateCourseData } from "@/Types/CourseTypes";
 import { revalidatePath } from "next/cache";
 
-
 export async function CreateCourse(course: CreateCourseData): Promise<Course> {
-    const token = await getToken();
-    
-    try {
-    const response = await fetch("http://localhost:8000/api/courses", {
-        method: "POST",
-        headers: {
-        "Accept": "application/json",
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": 'application/json'
-        },
-    body: JSON.stringify( course )
-    })
+  const token = await getToken();
 
-    if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}`)
-    }
+  const response = await fetch("http://localhost:8000/api/courses", {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      course_name: course.course_name,
+      student_ids: course.student_ids,
+      instructor_ids: course.instructor_ids,
+      feature_ids: course.feature_ids,
+    }),
+  });
 
-    const data = await response.json()
-    revalidatePath("/admin");
-    revalidatePath("/instructor");
-    revalidatePath("/student");
-    return data
-    } catch (error) {
-    console.error(" Error creating course:", error)
-    throw new Error("Failed to create course")
-    }
+  if (!response.ok) {
+    throw new Error(`API responded with status ${response.status}`);
+  }
+
+  const data: Course = await response.json();
+
+  revalidatePath("/admin");
+  revalidatePath("/instructor");
+  revalidatePath("/student");
+
+  return data;
 }

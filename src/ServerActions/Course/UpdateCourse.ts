@@ -1,33 +1,34 @@
 'use server'
-
 import { getToken } from "@/cookies/auth.actions";
-import { Course, CreateCourseData } from "@/Types/CourseTypes";
+import { Course, UpdateCourseData } from "@/Types/CourseTypes";
 import { revalidatePath } from "next/cache";
 
-export async function UpdateCourse(course_id: number, updateCourseData: CreateCourseData): Promise<Course> {
-    const token = await getToken();
-    try {
-    const response = await fetch(`http://localhost:8000/api/courses/${course_id}`, {
-        method: "PATCH",
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updateCourseData)
-    });
+export async function UpdateCourse(courseId: number, course: UpdateCourseData): Promise<Course> {
+  const token = await getToken();
 
-    if (!response.ok) {
-        throw new Error("Failed to update course")
-    }
-    const data = await response.json();
-        revalidatePath("/admin");
-        revalidatePath("/instructor");
-        revalidatePath("/student");
-    return data;
-    
-  } catch (error) {
-    console.error("Error updating course:", error)
-    throw error
-}
+  const response = await fetch(`http://localhost:8000/api/courses/${courseId}`, {
+    method: "PATCH",       
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      course_name: course.course_name,
+      instructor_ids: course.instructor_ids,
+      feature_ids: course.feature_ids,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`API responded with status ${response.status}`);
+  }
+
+  const data: Course = await response.json();
+
+  revalidatePath("/admin");
+  revalidatePath("/instructor");
+  revalidatePath("/student");
+
+  return data;
 }
