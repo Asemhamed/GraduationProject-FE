@@ -1,6 +1,6 @@
 'use server'
 
-import { getToken } from "@/Cookies/auth.actions";
+import { getToken } from "@/cookies/auth.actions";
 import { Course, CreateCourseData } from "@/Types/CourseTypes";
 import { revalidatePath } from "next/cache";
 

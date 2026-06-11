@@ -1,6 +1,6 @@
 "use client"
 
-import { useLogout } from "@/Hooks/useLogout"
+import { useLogout } from "@/hooks/useLogout"
 import { InstructorRecord } from "@/Types/StudentTypes"
 import {
   Calendar,

@@ -1,7 +1,7 @@
 // context/UserDataContext.tsx
 'use client'
 
-import { getToken } from "@/Cookies/auth.actions"
+import { getToken } from "@/cookies/auth.actions"
 import { createContext, useContext, useEffect, useState } from "react"
 
 type UserData = {

@@ -1,6 +1,6 @@
 'use client'
 
-import { UserDataProvider } from '@/Context/UserData'
+import { UserDataProvider } from '@/context/UserData'
 import { ReactNode } from 'react'
 import { Bounce, ToastContainer } from 'react-toastify'
 

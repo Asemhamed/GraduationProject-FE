@@ -1,6 +1,5 @@
 'use server'
-
-import { getToken } from "@/Cookies/auth.actions";
+import { getToken } from "@/cookies/auth.actions";
 import { CreateAdminData, CreateAdminResponse } from "@/Types/AdminTypes";
 
 
@@ -8,7 +7,7 @@ export async function CreateAdmin(admin: CreateAdminData): Promise<CreateAdminRe
     const token = await getToken();
     
     try {
-    const response = await fetch("http://localhost:8000/api/people/admins", {
+    const response = await fetch(`http://localhost:8000/api/people/admins`, {
         method: "POST",
         headers: {
         "Accept": "application/json",

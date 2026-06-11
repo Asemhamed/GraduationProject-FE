@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Exo } from "next/font/google";
 import Providers from './_Components/Providers/Providers';
 import "./globals.css";
-import { useUserData } from '@/Context/UserData';
+import { useUserData } from '@/context/UserData';
 
 const exo = Exo({
   variable: "--font-exo",

@@ -1,5 +1,5 @@
 'use client';
-import { useUserData } from "@/Context/UserData";
+import { useUserData } from "@/context/UserData";
 import { redirect } from "next/navigation";
 
 export default function Home() {

@@ -1,6 +1,6 @@
 'use server'
 
-import { getToken } from "@/Cookies/auth.actions";
+import { getToken } from "@/cookies/auth.actions";
 import { CreateAdminResponse, UpdateAdminData } from "@/Types/AdminTypes";
 
 export async function UpdateAdmin(admin_id: number, admin_data: UpdateAdminData): Promise<CreateAdminResponse> {

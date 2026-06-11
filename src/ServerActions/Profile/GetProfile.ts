@@ -1,4 +1,4 @@
-import { getToken } from "@/Cookies/auth.actions";
+import { getToken } from "@/cookies/auth.actions";
 
 export async function GetProfile(): Promise<any> {
   const token = await getToken();

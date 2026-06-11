@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from "next/cache"
-import { getToken } from "@/Cookies/auth.actions"
+import { getToken } from "@/cookies/auth.actions"
 import { CreateAdminResponse, UpdateProfileData } from "@/Types/AdminTypes"
 
 export async function UpdateProfile(profile_data: UpdateProfileData): Promise<CreateAdminResponse> {

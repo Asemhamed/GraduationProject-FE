@@ -1,7 +1,7 @@
 // ServerActions/Enrollment/Actions.ts
 'use server'
 
-import { getToken } from "@/Cookies/auth.actions";
+import { getToken } from "@/cookies/auth.actions";
 import { revalidatePath } from "next/cache";
 
 export async function UnEnrollStudent(course_id: number): Promise<boolean> {

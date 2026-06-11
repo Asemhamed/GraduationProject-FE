@@ -1,6 +1,6 @@
 'use server'
 
-import { getToken } from "@/Cookies/auth.actions";
+import { getToken } from "@/cookies/auth.actions";
 import { RoomsResponse } from "@/Types/RoomsType";
 
 export async function GetRooms(skip: number = 0, limit: number = 100): Promise<RoomsResponse > {

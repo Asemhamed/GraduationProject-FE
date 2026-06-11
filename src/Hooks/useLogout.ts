@@ -1,6 +1,6 @@
 // hooks/useLogout.ts
-import { useUserData } from "@/Context/UserData"
-import { deleteToken } from "@/Cookies/auth.actions"
+import { useUserData } from "@/context/UserData"
+import { deleteToken } from "@/cookies/auth.actions"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "react-toastify"

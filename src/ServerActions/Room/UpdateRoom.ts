@@ -1,6 +1,6 @@
 'use server'
 
-import { getToken } from "@/Cookies/auth.actions";
+import { getToken } from "@/cookies/auth.actions";
 import { revalidatePath } from "next/cache";
 
 export async function UpdateRoom(room_id: number, capacity: number, feature_ids: number[]): Promise<any> {

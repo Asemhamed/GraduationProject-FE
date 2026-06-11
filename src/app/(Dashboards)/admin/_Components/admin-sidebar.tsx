@@ -1,6 +1,6 @@
 "use client"
 
-import { useLogout } from "@/Hooks/useLogout"
+import { useLogout } from "@/hooks/useLogout"
 import { AdminResponse } from "@/Types/AdminTypes"
 import {
   BookOpen,

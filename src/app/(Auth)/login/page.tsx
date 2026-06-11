@@ -1,7 +1,7 @@
 'use client'
 
-import { useUserData } from '@/Context/UserData'
-import { setToken } from '@/Cookies/auth.actions'
+import { useUserData } from '@/context/UserData'
+import { setToken } from '@/cookies/auth.actions'
 import { LoginSchema, LoginType } from '@/Schema/AuthScheema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, Eye, EyeOff, GraduationCap, IdCard, Lock } from 'lucide-react'

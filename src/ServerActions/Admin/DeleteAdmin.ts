@@ -1,6 +1,6 @@
 'use server'
 
-import { getToken } from "@/Cookies/auth.actions";
+import { getToken } from "@/cookies/auth.actions";
 
 export async function DeleteAdmin(adminId: number): Promise<boolean> {
     const token = await getToken();
