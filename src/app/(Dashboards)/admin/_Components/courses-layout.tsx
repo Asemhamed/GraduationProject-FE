@@ -8,8 +8,6 @@ import {
     GraduationCap,
     Layers,
     Loader2,
-    LockOpen,
-    LockKeyhole,   // NEW: enrollment open/closed icon
     Plus,
     Search,
     User,
@@ -26,19 +24,11 @@ import { DeleteCourse } from "@/ServerActions/Course/DeleteCourse"
 import { GetCourses } from "@/ServerActions/Course/GetCourses"
 import { UpdateCourse } from "@/ServerActions/Course/UpdateCourse"
 
+import { GetCourseEnrollments } from "@/ServerActions/Enrollment/GetCourseEnrollments"
+import { Course, CourseResponse, CreateCourseData } from "@/Types/CourseTypes"
 import { StudentResponse } from "@/Types/StudentTypes"
 import Link from "next/link"
 
-
-import { Course, CourseResponse, CreateCourseData, UpdateCourseData } from "@/Types/CourseTypes"
-
-// Local form shape — superset of both create & update
-interface CourseFormData {
-  course_name: string;
-  student_ids: number[];
-  instructor_ids: number[];
-  feature_ids: number[];
-}
 interface CoursesLayoutProps {
     initialCourses: CourseResponse;
     availableInstructors?: { instructor_id: number; name: string }[];
@@ -56,18 +46,28 @@ export default function CoursesLayout({
     const [searchQuery, setSearchQuery] = useState("")
     const [skip, setSkip] = useState(0)
     const [isLoadingMore, setIsLoadingMore] = useState(false)
+
     const [hasMore, setHasMore] = useState(initialCourses.length === 100)
     const LIMIT = 100
-
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingItem, setEditingItem] = useState<Course | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [itemToDelete, setItemToDelete] = useState<number | null>(null)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<CourseFormData>()
+    const [isEnrollmentsModalOpen, setIsEnrollmentsModalOpen] = useState(false)
+    const [enrollmentsData, setEnrollmentsData] = useState<StudentResponse | null>(null)
+    const [isLoadingEnrollments, setIsLoadingEnrollments] = useState(false)
+    const [selectedCourseName, setSelectedCourseName] = useState("")
 
+    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CreateCourseData>({
+        defaultValues: {
+            course_availability: Array(45).fill(1),
+            precedence_rules: []
+        }
+    })
 
+    const watchAvailability = watch("course_availability", Array(45).fill(1)) || Array(45).fill(1);
     const filteredData = data
         .filter(item =>
             item.course_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,9 +81,9 @@ export default function CoursesLayout({
             const nextSkip = skip + LIMIT
             const newCourses = await GetCourses(nextSkip, LIMIT)
             if (newCourses.length < LIMIT) setHasMore(false)
-            setData(prev => [...prev, ...newCourses])
+            setData((prev) => [...prev, ...newCourses])
             setSkip(nextSkip)
-        } catch {
+        } catch (error) {
             toast.error("Failed to load more records")
         } finally {
             setIsLoadingMore(false)
@@ -95,77 +95,91 @@ export default function CoursesLayout({
             setEditingItem(item)
             reset({
                 course_name: item.course_name,
-                student_ids: item.students?.map(s => s.student_id) ?? [],
-                instructor_ids: item.instructors?.map(i => i.instructor_id) ?? [],
-                feature_ids: item.features?.map(f => f.feature_id) ?? [],
+                is_enrollment_open: item.is_enrollment_open || false,
+                student_ids: item.students?.map(s => s.student_id) || [],
+                instructor_ids: item.instructors?.map(i => i.instructor_id) || [],
+                feature_ids: item.features?.map(f => f.feature_id) || [],
+                course_availability: item.course_availability && item.course_availability.length === 45 ? item.course_availability : Array(45).fill(1),
+                precedence_rules: item.precedence_rules || []
             })
         } else {
             setEditingItem(null)
-            reset({ course_name: "", student_ids: [], instructor_ids: [], feature_ids: [] })
+            reset({
+                course_name: "",
+                is_enrollment_open: false,
+                student_ids: [],
+                instructor_ids: [],
+                feature_ids: [],
+                course_availability: Array(45).fill(1),
+                precedence_rules: []
+            })
         }
         setIsDialogOpen(true)
     }
 
-const onSubmit = async (formData: CourseFormData) => {
-    setIsSubmitting(true)
-    try {
-        if (editingItem) {
-            // Update: send only course_name, instructor_ids, feature_ids
-            const payload: UpdateCourseData = {
-                course_name: formData.course_name,
-                instructor_ids: (formData.instructor_ids ?? []).map(Number),
-                feature_ids: (formData.feature_ids ?? []).map(Number),
-                // student_ids NOT sent — update endpoint doesn't accept it
-            }
-            const result = await UpdateCourse(editingItem.course_id, payload)
-            setData(prev => prev.map(c => c.course_id === editingItem.course_id ? result : c))
-            toast.success("Course updated successfully")
-        } else {
-            // Create: send all four fields including student_ids
-            const payload: CreateCourseData = {
-                course_name: formData.course_name,
-                student_ids: (formData.student_ids ?? []).map(Number),
-                instructor_ids: (formData.instructor_ids ?? []).map(Number),
-                feature_ids: (formData.feature_ids ?? []).map(Number),
-            }
-            const result = await CreateCourse(payload)
-            setData(prev => [result, ...prev])
-            toast.success("Course created successfully")
+    const handleViewEnrollments = async (course: Course) => {
+        setSelectedCourseName(course.course_name)
+        setIsEnrollmentsModalOpen(true)
+        setEnrollmentsData(null)
+        setIsLoadingEnrollments(true)
+        try {
+            const result = await GetCourseEnrollments(course.course_id)
+            setEnrollmentsData(result)
+        } catch (error) {
+            toast.error("Failed to load enrollments")
+            setIsEnrollmentsModalOpen(false)
+        } finally {
+            setIsLoadingEnrollments(false)
         }
-        setIsDialogOpen(false)
-        reset()
-    } catch (error: any) {
-        toast.error(error.message || "An error occurred")
-    } finally {
-        setIsSubmitting(false)
     }
-}
 
-    const confirmDelete = async () => {
-        if (!itemToDelete) return
+    const onSubmit = async (formData: CreateCourseData) => {
         setIsSubmitting(true)
         try {
-            await DeleteCourse(itemToDelete)
-            setData(prev => prev.filter(c => c.course_id !== itemToDelete))
-            toast.success("Course deleted")
-            setIsDeleteModalOpen(false)
-        } catch {
-            toast.error("Failed to delete course")
+            const payload = {
+                ...formData,
+                student_ids: (formData.student_ids || []).map(Number),
+                instructor_ids: (formData.instructor_ids || []).map(Number),
+                feature_ids: (formData.feature_ids || []).map(Number),
+                precedence_rules: (formData.precedence_rules || []).map(Number),
+                course_availability: formData.course_availability || Array(45).fill(1)
+            }
+
+            if (editingItem) {
+                const result = await UpdateCourse(editingItem.course_id, payload)
+                setData(prevData => prevData.map(c =>
+                    c.course_id === editingItem.course_id ? result : c
+                ))
+                toast.success("Course updated successfully")
+            } else {
+                const result = await CreateCourse(payload)
+                setData(prev => [result, ...prev])
+                toast.success("Course created successfully")
+            }
+            setIsDialogOpen(false)
+            reset()
+        } catch (error: any) {
+            toast.error(error.message || "An error occurred")
         } finally {
             setIsSubmitting(false)
         }
     }
 
-    // ── Enrollment badge helper ──────────────────────────────────────────────
-    const EnrollmentBadge = ({ open }: { open: boolean }) => (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide
-            ${open ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}>
-            {open
-                ? <><LockOpen className="h-3 w-3" /> Open</>
-                : <><LockKeyhole className="h-3 w-3" /> Closed</>
-            }
-        </span>
-    )
+    const confirmDelete = async () => {
+
+        if (!itemToDelete) return
+        setIsSubmitting(true)
+        try {
+            await DeleteCourse(itemToDelete)
+            setData(data.filter(c => c.course_id !== itemToDelete))
+            toast.success("Course deleted")
+            setIsDeleteModalOpen(false)
+        } catch (error: any) {
+            toast.error("Failed to delete course")
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-500">
@@ -193,7 +207,7 @@ const onSubmit = async (formData: CourseFormData) => {
             {/* Table / Cards */}
             <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
 
-                {/* Search */}
+                {/* Search bar */}
                 <div className="p-4 md:p-6 border-b border-slate-50 bg-slate-50/30">
                     <div className="relative w-full md:max-w-sm">
                         <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -202,12 +216,12 @@ const onSubmit = async (formData: CourseFormData) => {
                             placeholder="Search courses..."
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                 </div>
 
-                {/* ── DESKTOP table ── */}
+                {/* ── DESKTOP: table ── */}
                 <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -216,20 +230,18 @@ const onSubmit = async (formData: CourseFormData) => {
                                 <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Course Name</th>
                                 <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Instructors</th>
                                 <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Enrollment</th>
-                                {/* NEW column */}
-                                <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Status</th>
                                 <th className="px-8 py-4 text-right text-xs font-bold uppercase tracking-widest text-slate-400">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {filteredData.map(course => (
+                            {filteredData.map((course) => (
                                 <tr key={course.course_id} className="group hover:bg-indigo-50/20 transition-colors">
                                     <td className="px-8 py-5 text-sm font-mono text-indigo-600 font-semibold">
-                                        #{course.course_id.toString().padStart(3, "0")}
+                                        #{course.course_id.toString().padStart(3, '0')}
                                     </td>
                                     <td className="px-8 py-5">
                                         <div className="text-sm font-bold text-slate-800">{course.course_name}</div>
-                                        <div className="flex gap-1 mt-1 flex-wrap">
+                                        <div className="flex gap-1 mt-1">
                                             {course.features?.map(f => (
                                                 <span key={f.feature_id} className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold">
                                                     {f.feature_name}
@@ -239,7 +251,7 @@ const onSubmit = async (formData: CourseFormData) => {
                                     </td>
                                     <td className="px-8 py-5">
                                         <div className="flex flex-col gap-1">
-                                            {course.instructors?.length > 0
+                                            {course.instructors && course.instructors.length > 0
                                                 ? course.instructors.map(inst => (
                                                     <div key={inst.instructor_id} className="text-xs text-slate-600 flex items-center gap-1.5">
                                                         <User className="h-3 w-3 text-slate-400" /> {inst.name}
@@ -255,12 +267,8 @@ const onSubmit = async (formData: CourseFormData) => {
                                             className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 rounded-full text-xs font-bold text-slate-600 transition-colors group/badge"
                                         >
                                             <Users className="h-3.5 w-3.5 group-hover/badge:text-indigo-500" />
-                                            {course.students?.length ?? 0} Students
+                                            {course.students?.length || 0} Students
                                         </Link>
-                                    </td>
-                                    {/* NEW: enrollment open/closed status */}
-                                    <td className="px-8 py-5">
-                                        <EnrollmentBadge open={course.is_enrollment_open} />
                                     </td>
                                     <td className="px-8 py-5 text-right">
                                         <ActionDropdown
@@ -283,7 +291,7 @@ const onSubmit = async (formData: CourseFormData) => {
                     )}
                 </div>
 
-                {/* ── MOBILE cards ── */}
+                {/* ── MOBILE: cards ── */}
                 <div className="md:hidden divide-y divide-slate-100">
                     {filteredData.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -292,57 +300,68 @@ const onSubmit = async (formData: CourseFormData) => {
                             </div>
                             <p className="text-sm font-bold text-slate-400">No courses found</p>
                         </div>
-                    ) : filteredData.map(course => (
-                        <div key={course.course_id} className="p-4 hover:bg-indigo-50/20 transition-colors">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="flex items-center gap-3 min-w-0 flex-wrap">
-                                    <span className="shrink-0 text-xs font-mono font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg">
-                                        #{course.course_id.toString().padStart(3, "0")}
-                                    </span>
-                                    <p className="text-sm font-bold text-slate-800 leading-snug truncate">
-                                        {course.course_name}
-                                    </p>
-                                    {/* NEW: status badge on mobile */}
-                                    <EnrollmentBadge open={course.is_enrollment_open} />
-                                </div>
-                                <ActionDropdown
-                                    onEdit={() => handleOpenDialog(course)}
-                                    onDelete={() => { setItemToDelete(course.course_id); setIsDeleteModalOpen(true) }}
-                                />
-                            </div>
-
-                            {course.features && course.features.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-2 ml-1">
-                                    {course.features.map(f => (
-                                        <span key={f.feature_id} className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold">
-                                            {f.feature_name}
+                    ) : (
+                        filteredData.map((course) => (
+                            <div key={course.course_id} className="p-4 hover:bg-indigo-50/20 transition-colors">
+                                {/* Card top row: ID + name + actions */}
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <span className="shrink-0 text-xs font-mono font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg">
+                                            #{course.course_id.toString().padStart(3, '0')}
                                         </span>
-                                    ))}
+                                        <p className="text-sm font-bold text-slate-800 leading-snug truncate">
+                                            {course.course_name}
+                                        </p>
+                                        <Link
+                                            href={`enrollments/${course.course_id}`}
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 rounded-full text-xs font-bold text-slate-600 transition-colors"
+                                        >
+                                            <Users className="h-3.5 w-3.5" />
+                                            {course.students?.length || 0} Students
+                                        </Link>
+                                    </div>
+                                    <ActionDropdown
+                                        onEdit={() => handleOpenDialog(course)}
+                                        onDelete={() => { setItemToDelete(course.course_id); setIsDeleteModalOpen(true) }}
+                                    />
                                 </div>
-                            )}
 
-                            <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
-                                {course.instructors?.length > 0
-                                    ? course.instructors.map(inst => (
-                                        <div key={inst.instructor_id} className="flex items-center gap-1 text-xs text-slate-500">
-                                            <User className="h-3 w-3 text-slate-400" /> {inst.name}
-                                        </div>
-                                    ))
-                                    : <span className="text-xs text-slate-400 italic">No instructor assigned</span>
-                                }
-                            </div>
+                                {/* Feature tags */}
+                                {course.features && course.features.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2 ml-1">
+                                        {course.features.map(f => (
+                                            <span key={f.feature_id} className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold">
+                                                {f.feature_name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
 
-                            <div className="mt-3">
-                                <Link
-                                    href={`enrollments/${course.course_id}`}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 rounded-full text-xs font-bold text-slate-600 transition-colors"
-                                >
-                                    <Users className="h-3.5 w-3.5" />
-                                    {course.students?.length ?? 0} Students
-                                </Link>
+                                {/* Instructors row */}
+                                <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
+                                    {course.instructors && course.instructors.length > 0
+                                        ? course.instructors.map(inst => (
+                                            <div key={inst.instructor_id} className="flex items-center gap-1 text-xs text-slate-500">
+                                                <User className="h-3 w-3 text-slate-400" /> {inst.name}
+                                            </div>
+                                        ))
+                                        : <span className="text-xs text-slate-400 italic">No instructor assigned</span>
+                                    }
+                                </div>
+
+                                {/* Enrollment button */}
+                                <div className="mt-3">
+                                    <button
+                                        onClick={() => handleViewEnrollments(course)}
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 rounded-full text-xs font-bold text-slate-600 transition-colors"
+                                    >
+                                        <Users className="h-3.5 w-3.5" />
+                                        {course.students?.length || 0} Students
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    )}
                 </div>
 
                 {/* Footer */}
@@ -361,6 +380,67 @@ const onSubmit = async (formData: CourseFormData) => {
                     )}
                 </div>
             </div>
+
+            {/* ── Enrollments Modal ── */}
+            <Modal
+                open={isEnrollmentsModalOpen}
+                onClose={() => setIsEnrollmentsModalOpen(false)}
+                title="Enrolled Students"
+                description={`Viewing all students enrolled in "${selectedCourseName}"`}
+            >
+                <div className="mt-2 min-h-[200px]">
+                    {isLoadingEnrollments ? (
+                        <div className="flex flex-col items-center justify-center py-16 gap-3">
+                            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+                            <p className="text-sm text-slate-400 font-medium">Loading students...</p>
+                        </div>
+                    ) : enrollmentsData && enrollmentsData.length > 0 ? (
+                        <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold">
+                                    <Users className="h-3.5 w-3.5" />
+                                    {enrollmentsData.length} {enrollmentsData.length === 1 ? "Student" : "Students"} Enrolled
+                                </span>
+                            </div>
+                            {enrollmentsData.map((student, index) => (
+                                <div
+                                    key={student.student_id}
+                                    className="flex items-center gap-4 p-3.5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-indigo-100 hover:shadow-sm transition-all"
+                                >
+                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white text-sm font-bold shadow-sm">
+                                        {student.full_name?.charAt(0).toUpperCase() ?? "?"}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-bold text-slate-800 truncate">{student.full_name}</p>
+                                        <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-indigo-50 text-indigo-500">
+                                            {student.semester}
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] font-mono text-slate-300 font-bold shrink-0">
+                                        #{String(index + 1).padStart(2, "0")}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
+                                <GraduationCap className="h-7 w-7 text-slate-300" />
+                            </div>
+                            <p className="text-sm font-bold text-slate-500">No students enrolled</p>
+                            <p className="text-xs text-slate-400">This course has no enrolled students yet.</p>
+                        </div>
+                    )}
+                </div>
+                <div className="flex justify-end pt-6 border-t border-slate-100 mt-4">
+                    <button
+                        onClick={() => setIsEnrollmentsModalOpen(false)}
+                        className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+                    >
+                        Close
+                    </button>
+                </div>
+            </Modal>
 
             {/* ── Create / Edit Modal ── */}
             <Modal
@@ -385,6 +465,23 @@ const onSubmit = async (formData: CourseFormData) => {
                         )}
                     </div>
 
+                    <div className="space-y-1.5">
+                        <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                            <div className="relative flex items-center justify-center">
+                                <input
+                                    type="checkbox"
+                                    {...register("is_enrollment_open")}
+                                    className="peer h-5 w-5 opacity-0 absolute cursor-pointer"
+                                />
+                                <div className="h-5 w-10 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </div>
+                            <div>
+                                <div className="text-sm font-bold text-slate-800">Enrollment Open</div>
+                                <div className="text-xs text-slate-500">Allow students to enroll in this course automatically.</div>
+                            </div>
+                        </label>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Instructors */}
                         <div className="space-y-3">
@@ -392,8 +489,8 @@ const onSubmit = async (formData: CourseFormData) => {
                                 <User className="h-3.5 w-3.5" /> Assign Instructors
                             </div>
                             <div className="grid grid-cols-1 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-100 max-h-[200px] overflow-y-auto shadow-inner">
-                                {availableInstructors.map(inst => (
-                                    <label key={inst.instructor_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all">
+                                {availableInstructors.map((inst) => (
+                                    <label key={inst.instructor_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all group">
                                         <div className="relative flex items-center justify-center">
                                             <input type="checkbox" value={inst.instructor_id} {...register("instructor_ids")} className="peer h-5 w-5 opacity-0 absolute cursor-pointer" />
                                             <div className="h-5 w-5 border-2 border-slate-300 rounded-md peer-checked:border-indigo-600 peer-checked:bg-indigo-600 flex items-center justify-center">
@@ -412,8 +509,8 @@ const onSubmit = async (formData: CourseFormData) => {
                                 <GraduationCap className="h-3.5 w-3.5" /> Enroll Students
                             </div>
                             <div className="grid grid-cols-1 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-100 max-h-[200px] overflow-y-auto shadow-inner">
-                                {availableStudents.map(stud => (
-                                    <label key={stud.student_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all">
+                                {availableStudents.map((stud) => (
+                                    <label key={stud.student_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all group">
                                         <div className="relative flex items-center justify-center">
                                             <input type="checkbox" value={stud.student_id} {...register("student_ids")} className="peer h-5 w-5 opacity-0 absolute cursor-pointer" />
                                             <div className="h-5 w-5 border-2 border-slate-300 rounded-md peer-checked:border-indigo-600 peer-checked:bg-indigo-600 flex items-center justify-center">
@@ -433,7 +530,7 @@ const onSubmit = async (formData: CourseFormData) => {
                             <Layers className="h-3.5 w-3.5" /> Features
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                            {availableFeatures.map(feat => (
+                            {availableFeatures.map((feat) => (
                                 <label key={feat.feature_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all">
                                     <div className="relative flex items-center justify-center">
                                         <input type="checkbox" value={feat.feature_id} {...register("feature_ids")} className="peer h-5 w-5 opacity-0 absolute cursor-pointer" />
@@ -447,12 +544,77 @@ const onSubmit = async (formData: CourseFormData) => {
                         </div>
                     </div>
 
+                    {/* Precedence Rules */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
+                            <Layers className="h-3.5 w-3.5" /> Prerequisite Courses
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-100 max-h-[150px] overflow-y-auto shadow-inner">
+                            {data.filter(c => c.course_id !== editingItem?.course_id).map((c) => (
+                                <label key={c.course_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all">
+                                    <div className="relative flex items-center justify-center">
+                                        <input type="checkbox" value={c.course_id} {...register("precedence_rules")} className="peer h-5 w-5 opacity-0 absolute cursor-pointer" />
+                                        <div className="h-5 w-5 border-2 border-slate-300 rounded-md peer-checked:border-indigo-600 peer-checked:bg-indigo-600 flex items-center justify-center">
+                                            <CheckCircle2 className="h-3.5 w-3.5 text-white scale-0 peer-checked:scale-100 transition-transform" />
+                                        </div>
+                                    </div>
+                                    <span className="text-sm text-slate-600 font-medium truncate">{c.course_name}</span>
+                                </label>
+                            ))}
+                            {data.filter(c => c.course_id !== editingItem?.course_id).length === 0 && (
+                                <span className="text-xs text-slate-400 italic">No other courses available</span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Course Availability Grid */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
+                            <Layers className="h-3.5 w-3.5" /> Weekly Availability
+                        </div>
+                        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 overflow-x-auto shadow-inner">
+                            <div className="min-w-[400px]">
+                                <div className="grid grid-cols-5 gap-1 mb-1">
+                                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => (
+                                        <div key={day} className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                            {day}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="grid grid-rows-9 gap-1">
+                                    {Array.from({ length: 9 }).map((_, slotIdx) => (
+                                        <div key={`slot-${slotIdx}`} className="grid grid-cols-5 gap-1">
+                                            {Array.from({ length: 5 }).map((_, dayIdx) => {
+                                                const flatIdx = dayIdx * 9 + slotIdx; // Column-major if 45 slots are grouped by day. Wait, usually timeslots are 5 days * 9 slots. We'll map them sequentially: Monday slots 0-8, Tuesday 9-17, etc.
+                                                const isAvailable = watchAvailability[flatIdx] === 1;
+                                                return (
+                                                    <button
+                                                        key={flatIdx}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const newAvail = [...watchAvailability];
+                                                            newAvail[flatIdx] = isAvailable ? 0 : 1;
+                                                            setValue("course_availability", newAvail, { shouldDirty: true });
+                                                        }}
+                                                        className={`h-8 rounded-md text-[10px] font-bold transition-all ${isAvailable ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' : 'bg-white border border-slate-200 text-slate-400 hover:bg-slate-50'}`}
+                                                    >
+                                                        Slot {slotIdx + 1}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 sticky bottom-0 bg-white">
                         <button type="button" onClick={() => setIsDialogOpen(false)} className="px-6 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">
                             Cancel
                         </button>
                         <button type="submit" disabled={isSubmitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white hover:bg-indigo-700 shadow-lg active:scale-95 disabled:opacity-50 transition-all">
-                            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : editingItem ? "Update Course" : "Create Course"}
+                            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (editingItem ? "Update Course" : "Create Course")}
                         </button>
                     </div>
                 </form>

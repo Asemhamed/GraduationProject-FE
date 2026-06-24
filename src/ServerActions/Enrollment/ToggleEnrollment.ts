@@ -13,7 +13,7 @@ export async function ToggleEnrollment(
   const token = await getToken();
   try {
     const response = await fetch(
-      `http://localhost:8000/api/enrollment/${course_Id}/toggle?is_open=${is_open}`,
+      `${process.env.API_URL}/api/enrollment/${course_Id}/toggle?is_open=${is_open}`,
       {
         method: "PATCH",
         headers: {

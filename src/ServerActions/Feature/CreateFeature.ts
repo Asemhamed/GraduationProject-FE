@@ -5,18 +5,18 @@ import { CreateFeatureResponse } from "@/Types/FeaturesType";
 import { revalidatePath } from "next/cache";
 
 
-export async function CreateFeature(feature_name:string): Promise<CreateFeatureResponse | { error: string } | Response> {
+export async function CreateFeature(feature_name: string): Promise<CreateFeatureResponse | { error: string } | Response> {
   const token = await getToken();
-  
+
   try {
-    const response = await fetch("http://localhost:8000/api/facilities/features", {
+    const response = await fetch(`${process.env.API_URL}/api/facilities/features`, {
       method: "POST",
       headers: {
         "Accept": "application/json",
         "Authorization": `Bearer ${token}`,
         "Content-Type": 'application/json'
       },
-    body: JSON.stringify({ feature_name })
+      body: JSON.stringify({ feature_name })
     })
 
     if (!response.ok) {

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 export async function CreateCourse(course: CreateCourseData): Promise<Course> {
   const token = await getToken();
 
-  const response = await fetch("http://localhost:8000/api/courses", {
+  const response = await fetch(`${process.env.API_URL}/api/courses`, {
     method: "POST",
     headers: {
       "Accept": "application/json",

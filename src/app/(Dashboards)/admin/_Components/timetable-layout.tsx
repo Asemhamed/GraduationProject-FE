@@ -32,27 +32,7 @@ const HOURS = [
     "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
 ]
 
-// course_availability[timeslot_id]: 1 = high priority, -1 = low priority, 0 = neutral
-type Priority = 1 | -1 | 0
 
-function getPriority(entry: TimetableResponse[number]): Priority {
-    const val = entry.course.course_availability[entry.timeslot_id]
-    if (val === 1) return 1
-    if (val === -1) return -1
-    return 0
-}
-
-const priorityBorder: Record<Priority, string> = {
-    1:   "border-emerald-400",
-    "-1": "border-red-400",
-    0:   "border-slate-200",
-}
-
-const priorityAccent: Record<Priority, string> = {
-    1:   "bg-emerald-50",
-    "-1": "bg-red-50",
-    0:   "bg-white",
-}
 
 export default function TimetableLayout({ initialTimetable }: TimetableLayoutProps) {
     const [timetable, setTimetable] = useState<TimetableResponse>(initialTimetable)
@@ -77,7 +57,7 @@ export default function TimetableLayout({ initialTimetable }: TimetableLayoutPro
         setIsGenerating(true)
         try {
             const result = await TriggerGeneration()
-            toast.success(result.message || "Generation started!")
+            toast.success("Generation started!")
             await handleRefresh()
         } catch {
             toast.error("Failed to trigger generation")
@@ -110,9 +90,8 @@ export default function TimetableLayout({ initialTimetable }: TimetableLayoutPro
         entry: TimetableResponse[number]
         compact?: boolean
     }) => {
-        const priority = getPriority(entry)
-        const border = priorityBorder[priority]
-        const accent = priorityAccent[priority]
+        const border = "border-slate-200"
+        const accent = "bg-slate-50"
 
         return (
             <div

@@ -7,7 +7,7 @@ import { AdminResponse } from "@/Types/AdminTypes";
 export async function GetAdmins(skip: number = 0, limit: number = 100): Promise<AdminResponse[]> {
   const token = await getToken();
   try {
-    const response = await fetch(`http://localhost:8000/api/people/admins?skip=${skip}&limit=${limit}`, {
+    const response = await fetch(`${process.env.API_URL}/api/people/admins?skip=${skip}&limit=${limit}`, {
       method: "GET",
       headers: {
         "Accept": "application/json",

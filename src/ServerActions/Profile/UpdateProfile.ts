@@ -7,7 +7,7 @@ import { CreateAdminResponse, UpdateProfileData } from "@/Types/AdminTypes"
 export async function UpdateProfile(profile_data: UpdateProfileData): Promise<CreateAdminResponse> {
     const token = await getToken()
 
-    const response = await fetch(`http://localhost:8000/api/people/me`, {
+    const response = await fetch(`${process.env.API_URL}/api/people/me`, {
         method: "PUT",
         headers: {
             'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ export async function UpdateProfile(profile_data: UpdateProfileData): Promise<Cr
 
     const data = await response.json()
 
-    revalidatePath("/profile") 
+    revalidatePath("/profile")
 
     return data
 }

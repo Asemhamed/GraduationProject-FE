@@ -6,9 +6,9 @@ import { revalidatePath } from "next/cache";
 
 export async function UnEnrollStudent(course_id: number): Promise<boolean> {
   const token = await getToken();
-  
+
   try {
-    const response = await fetch(`http://localhost:8000/api/enrollment/${course_id}/leave`, {
+    const response = await fetch(`${process.env.API_URL}/api/enrollment/${course_id}/leave`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -17,7 +17,7 @@ export async function UnEnrollStudent(course_id: number): Promise<boolean> {
 
     if (!response.ok) throw new Error(`API error: ${response.status}`);
 
-    revalidatePath("/enroll"); 
+    revalidatePath("/enroll");
     return true;
   } catch (error) {
     console.error("Error Unenrolling:", error);

@@ -5,18 +5,18 @@ import { Room } from "@/Types/RoomsType";
 import { revalidatePath } from "next/cache";
 
 
-export async function CreateRoom({capacity, feature_ids}: { capacity: number, feature_ids: number[] }): Promise<Room > {
+export async function CreateRoom({ capacity, feature_ids }: { capacity: number, feature_ids: number[] }): Promise<Room> {
   const token = await getToken();
-  
+
   try {
-    const response = await fetch("http://localhost:8000/api/facilities/rooms", {
+    const response = await fetch(`${process.env.API_URL}/api/facilities/rooms`, {
       method: "POST",
       headers: {
         "Accept": "application/json",
         "Authorization": `Bearer ${token}`,
         "Content-Type": 'application/json'
       },
-    body: JSON.stringify({ capacity, feature_ids })
+      body: JSON.stringify({ capacity, feature_ids })
     })
 
     if (!response.ok) {
@@ -24,10 +24,10 @@ export async function CreateRoom({capacity, feature_ids}: { capacity: number, fe
     }
 
     const data = await response.json()
-        revalidatePath("/admin");
-        revalidatePath("/instructor");
-        revalidatePath("/student");
-    
+    revalidatePath("/admin");
+    revalidatePath("/instructor");
+    revalidatePath("/student");
+
     return data
   } catch (error) {
     console.error(" Error creating room:", error)
