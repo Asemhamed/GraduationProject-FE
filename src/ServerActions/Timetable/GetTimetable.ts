@@ -6,7 +6,7 @@ import { TimetableResponse } from "@/Types/TimetableTypes"
 export async function GetTimetable(): Promise<TimetableResponse> {
     const token = await getToken()
     try {
-        const response = await fetch(`${process.env.API_URL}/api/timetable/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/timetable/`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",

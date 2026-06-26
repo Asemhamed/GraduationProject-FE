@@ -9,7 +9,7 @@ interface GenerationResult {
 export async function TriggerGeneration(): Promise<GenerationResult> {
     const token = await getToken()
     try {
-        const response = await fetch(`${process.env.API_URL}/api/timetable/generate/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/timetable/generate/`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",

@@ -7,7 +7,7 @@ export async function CreateAdmin(admin: CreateAdminData): Promise<CreateAdminRe
     const token = await getToken();
 
     try {
-        const response = await fetch(`${process.env.API_URL}/api/people/admins`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/people/admins`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",

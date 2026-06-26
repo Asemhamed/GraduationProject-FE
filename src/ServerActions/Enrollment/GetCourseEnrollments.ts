@@ -7,7 +7,7 @@ import { StudentResponse } from "@/Types/StudentTypes";
 export async function GetCourseEnrollments(course_Id: number): Promise<StudentResponse> {
   const token = await getToken();
   try {
-    const response = await fetch(`${process.env.API_URL}/api/enrollment/${course_Id}/students`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/enrollment/${course_Id}/students`, {
       method: "GET",
       headers: {
         "Accept": "application/json",

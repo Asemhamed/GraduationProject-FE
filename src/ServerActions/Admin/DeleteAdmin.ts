@@ -5,7 +5,7 @@ import { getToken } from "@/cookies/auth.actions";
 export async function DeleteAdmin(adminId: number): Promise<boolean> {
   const token = await getToken();
   try {
-    const response = await fetch(`${process.env.API_URL}/api/people/admins/${adminId}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/people/admins/${adminId}`, {
       method: "DELETE",
       headers: {
         'Authorization': `Bearer ${token}`,

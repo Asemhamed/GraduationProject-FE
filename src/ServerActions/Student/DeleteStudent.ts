@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 export async function DeleteStudent(studentId: number): Promise<boolean> {
   const token = await getToken();
   try {
-    const response = await fetch(`${process.env.API_URL}/api/people/students/${studentId}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/people/students/${studentId}`, {
       method: "DELETE",
       headers: {
         'Authorization': `Bearer ${token}`,

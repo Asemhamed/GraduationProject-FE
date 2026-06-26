@@ -9,7 +9,7 @@ export async function CreateFeature(feature_name: string): Promise<CreateFeature
   const token = await getToken();
 
   try {
-    const response = await fetch(`${process.env.API_URL}/api/facilities/features`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/facilities/features`, {
       method: "POST",
       headers: {
         "Accept": "application/json",

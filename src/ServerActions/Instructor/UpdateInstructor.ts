@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 export async function UpdateInstructor(instructor_id: number, name: string): Promise<InstructorResponse> {
     const token = await getToken();
     try {
-        const response = await fetch(`${process.env.API_URL}/api/people/instructors/${instructor_id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/people/instructors/${instructor_id}`, {
             method: "PATCH",
             headers: {
                 'Content-Type': 'application/json',

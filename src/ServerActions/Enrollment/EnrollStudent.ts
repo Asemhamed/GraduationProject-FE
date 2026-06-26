@@ -6,7 +6,7 @@ export async function EnrollStudent(course_id: number): Promise<any> {
   const token = await getToken();
 
   try {
-    const response = await fetch(`${process.env.API_URL}/api/enrollment/${course_id}/join`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/enrollment/${course_id}/join`, {
       method: "POST",
       headers: {
         "Accept": "application/json",

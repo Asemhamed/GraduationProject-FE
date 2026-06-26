@@ -6,7 +6,7 @@ import { getToken } from "@/cookies/auth.actions";
 export async function GetFeatures(skip: number = 0, limit: number = 100): Promise<any> {
   const token = await getToken();
   try {
-    const response = await fetch(`${process.env.API_URL}/api/facilities/features?skip=${skip}&limit=${limit}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/facilities/features?skip=${skip}&limit=${limit}`, {
       method: "GET",
       headers: {
         "Accept": "application/json",

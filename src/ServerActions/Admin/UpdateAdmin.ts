@@ -6,7 +6,7 @@ import { CreateAdminResponse, UpdateAdminData } from "@/Types/AdminTypes";
 export async function UpdateAdmin(admin_id: number, admin_data: UpdateAdminData): Promise<CreateAdminResponse> {
     const token = await getToken();
     try {
-        const response = await fetch(`${process.env.API_URL}/api/people/admins/${admin_id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/people/admins/${admin_id}`, {
             method: "PATCH",
             headers: {
                 'Content-Type': 'application/json',

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 export async function UpdateFeature(feature_id: number, feature_name: string): Promise<any> {
     const token = await getToken();
     try {
-        const response = await fetch(`${process.env.API_URL}/api/facilities/features/${feature_id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/facilities/features/${feature_id}`, {
             method: "PATCH",
             headers: {
                 'Content-Type': 'application/json',

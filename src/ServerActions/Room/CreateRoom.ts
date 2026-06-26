@@ -9,7 +9,7 @@ export async function CreateRoom({ capacity, feature_ids }: { capacity: number, 
   const token = await getToken();
 
   try {
-    const response = await fetch(`${process.env.API_URL}/api/facilities/rooms`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/facilities/rooms`, {
       method: "POST",
       headers: {
         "Accept": "application/json",

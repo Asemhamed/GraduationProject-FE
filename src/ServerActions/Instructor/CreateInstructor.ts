@@ -9,7 +9,7 @@ export async function CreateInstructor(instructor: CreateInstructorData): Promis
     const token = await getToken();
 
     try {
-        const response = await fetch(`${process.env.API_URL}/api/people/instructors`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/people/instructors`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",

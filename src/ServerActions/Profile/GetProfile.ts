@@ -5,7 +5,7 @@ export async function GetProfile(): Promise<any> {
 
   if (!token) return null;
   try {
-    const response = await fetch(`${process.env.API_URL}/api/people/me`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/people/me`, {
       method: "GET",
       headers: {
         "Accept": "application/json",

@@ -7,7 +7,7 @@ import { CourseResponse } from "@/Types/CourseTypes";
 export async function GetCourses(skip: number = 0, limit: number = 100): Promise<CourseResponse> {
   const token = await getToken();
   try {
-    const response = await fetch(`${process.env.API_URL}/api/courses?skip=${skip}&limit=${limit}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/courses?skip=${skip}&limit=${limit}`, {
       method: "GET",
       headers: {
         "Accept": "application/json",

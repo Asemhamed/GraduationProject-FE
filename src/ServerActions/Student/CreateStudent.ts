@@ -9,7 +9,7 @@ export async function CreateStudent(student: CreateStudentData): Promise<CreateS
     const token = await getToken();
 
     try {
-        const response = await fetch(`${process.env.API_URL}/api/people/students`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/people/students`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",

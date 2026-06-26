@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Exo } from "next/font/google";
 import Providers from './_Components/Providers/Providers';
 import "./globals.css";
-import { useUserData } from '@/context/UserData';
 
 const exo = Exo({
   variable: "--font-exo",
@@ -25,6 +24,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${exo.className}   h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
