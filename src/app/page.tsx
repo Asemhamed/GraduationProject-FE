@@ -2,7 +2,7 @@
 
 import { useUserData } from '@/context/UserData'
 import { removeToken, setToken } from '@/cookies/auth.actions'
-import { LoginSchema, LoginType } from '@/schema/AuthScheema'
+import { LoginSchema, LoginType } from '@/Schema/AuthScheema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, Eye, EyeOff, GraduationCap, IdCard, Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
